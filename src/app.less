@@ -269,52 +269,55 @@ a:link {
   top: 0;
 }
 
-/* Make the "Show issues" toggle look like a properties-panel header bar,
-   with the switch vertically centered. */
-.bjs-side-panel-pane[data-tab="issues"] .bio-properties-panel-toggle-switch-entry {
-  box-sizing: border-box;
+/* --- Issues panel (the properties-panel CSS is no longer bundled, so style it plainly) --- */
+
+/* "Show issues" toggle: a header bar with a plain checkbox, matching the side-panel look. */
+.wb-issues-header {
   display: flex;
   align-items: center;
-  min-height: 64px;
-  max-height: 64px;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 12px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wb-issues-header input[type="checkbox"] {
   margin: 0;
-  padding: 16px 10px;
-  font-size: var(--text-size-base);
-  background-color: var(--header-background-color);
-  border-top: 1px solid var(--header-bottom-border-color);
-  border-bottom: 1px solid var(--header-bottom-border-color);
 }
 
-/* CSS hacks for property panel and linting */
-
-.bjs-side-panel-pane[data-tab="issues"] > .bio-properties-panel {
-  display: unset;
-  position: unset;
-  height: unset;
-  width: unset;
-  overflow: unset;
+/* The issue list: one group per element, separated by a single bottom rule. */
+#issueList .bjsl-issues {
+  padding: 8px 12px;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-
-.bio-properties-panel {
-  --toggle-switch-on-background-color: #52b415;
+#issueList .bjsl-issues:hover {
+  background-color: #f5f5f5;
+  cursor: pointer;
 }
 
-.bio-properties-panel-group-header {
-  position: static;
+#issueList ul {
+  margin: 4px 0 0;
+  padding-left: 0;
+  list-style: none;
 }
 
-
-.bio-properties-panel-header {
-  min-height: 64px;
-  border-top: 1px solid var(--header-bottom-border-color);
+#issueList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 2px 0;
+  line-height: 1.4;
 }
 
-.bio-properties-panel-scroll-container {
-  overflow-x: unset;
-  overflow-y: unset;
-}
+#issueList li.error .icon.error { color: #cc3333; }
+#issueList li.warning .icon.warning { color: #e6a700; }
 
+/* bpmn-js-bpmnlint's own bottom-right panel + per-issue buttons aren't used here */
 .bjsl-button, .bjsl-issues-bottom-right {
   display: none;
 }
@@ -329,13 +332,9 @@ a:link {
   min-width: 0;
 }
 
-/* Each issue box has a full 1px border, so stacked boxes (and the first box vs. the
-   toggle header) double up. Drop the top border so every boundary is a single bottom
-   border; the header's bottom border provides the line above the first box. */
-.bjs-side-panel-pane[data-tab="issues"] #issueList .bjsl-issues {
-  border-top: none;
-  border-left: none;
-  border-right: none;
+/* Tokens sit above the lint issue markers (which use z-index 500 / 1000 on hover). */
+.djs-overlay-bts-token-count {
+  z-index: 1100;
 }
 
 

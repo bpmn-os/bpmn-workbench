@@ -6,19 +6,12 @@ export default function(modeler, parent) {
   const canvas = modeler.get('canvas');
   const contextPad = modeler.get('contextPad');
 
-  parent.innerHTML += 
-         `<div class="bio-properties-panel">
-            <div class="bio-properties-panel-entry bio-properties-panel-toggle-switch-entry">
-               <div class="bio-properties-panel-toggle-switch">
-                  <div class="bio-properties-panel-field-wrapper">
-                     <label class="bio-properties-panel-toggle-switch__switcher">
-                       <input id="lintingToggle" class="bio-properties-panel-input" type="checkbox" checked>
-                       <span class="bio-properties-panel-toggle-switch__slider"></span>
-                     </label>
-                     <p class="bio-properties-panel-toggle-switch__label">Show issues</p>
-                  </div>
-               </div>
-            </div>
+  parent.innerHTML +=
+         `<div class="wb-issues">
+            <label class="wb-issues-header">
+              <input id="lintingToggle" type="checkbox" checked>
+              <span>Show issues</span>
+            </label>
             <div id="issueList"></div>
          </div>`;
   const toggle = parent.querySelector('input');
