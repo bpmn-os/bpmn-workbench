@@ -20,10 +20,23 @@ export default function installModeButtons(modeler) {
   const sidePanel = modeler.get('sidePanel', false);
   const container = canvas.getContainer();
 
+  // Icon-only segmented control. Each icon is a composite: a thin outline ring (far fa-circle) with an
+  // inner glyph — a clicking finger for interactive Simulation, a play triangle for Playback. Labels live
+  // in the tooltips.
   const el = domify(`
     <div class="wb-mode-buttons">
-      <button type="button" data-mode="simulate">Simulation</button>
-      <button type="button" data-mode="playback">Playback</button>
+      <button type="button" data-mode="simulate" title="Simulation">
+        <span class="fa-stack wb-mode-icon">
+          <i class="far fa-circle fa-stack-2x"></i>
+          <i class="fas fa-hand-pointer fa-stack-1x wb-mode-inner"></i>
+        </span>
+      </button>
+      <button type="button" data-mode="playback" title="Playback">
+        <span class="fa-stack wb-mode-icon">
+          <i class="far fa-circle fa-stack-2x"></i>
+          <i class="fas fa-play fa-stack-1x wb-mode-inner wb-mode-play"></i>
+        </span>
+      </button>
     </div>
   `);
   container.appendChild(el);

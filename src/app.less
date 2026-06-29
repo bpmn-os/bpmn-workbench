@@ -3,6 +3,23 @@
   box-sizing: border-box;
 }
 
+/* Vendor (diagram-js / bpmn properties-panel) design tokens — one grey ramp + the blue accent, declared
+   at :root so both the canvas chrome and the side panel (outside .djs-parent) can use them. Semantic
+   issue colours (error/warning) are separate from the UI accent. */
+:root {
+  --wb-grey-15: hsl(225, 10%, 15%);
+  --wb-grey-35: hsl(225, 10%, 35%);
+  --wb-grey-55: hsl(225, 10%, 55%);
+  --wb-grey-75: hsl(225, 10%, 75%);
+  --wb-grey-90: hsl(225, 10%, 90%);
+  --wb-grey-95: hsl(225, 10%, 95%);
+  --wb-grey-97: hsl(225, 10%, 97%);
+  --wb-accent: hsl(205, 100%, 45%);
+  --wb-accent-strong: hsl(205, 100%, 50%);
+  --wb-error: hsl(360, 100%, 45%);
+  --wb-warning: #f7c71a;
+}
+
 body,
 html {
 
@@ -152,96 +169,130 @@ a:link {
 
 
 /* On-canvas mode buttons (top-left, above the palette). Greyed = Model mode. */
+/* One coupled **segmented control** (Simulation | Playback) rather than two separate buttons:
+   the segments share a border (overlapped via -1px margin), only the outer corners are rounded, and
+   selection is mutually exclusive — clicking the active segment returns to Model (neither active). */
 .wb-mode-buttons {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 20px;   /* match the palette's 20px corner inset */
+  left: 20px;
   z-index: 11;
-  display: flex;
-  gap: 4px;
+  display: inline-flex;
 }
 
 .wb-mode-buttons button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;            /* exactly the single-column palette width */
+  padding: 4px 0;
   font: inherit;
-  padding: 5px 10px;
-  border: solid 1px #ccc;
-  border-radius: 3px;
-  background: #fff;
-  color: #999;
+  border: 1px solid var(--wb-grey-75);
+  background: var(--wb-grey-97); /* the palette background colour */
+  color: var(--wb-grey-15);
   cursor: pointer;
 }
 
+/* composite mode icon: a thin outline ring (fa-stack-2x) with a small centred inner glyph (fa-stack-1x).
+   Both inherit the button's colour (grey / accent on hover / white when active). */
+.wb-mode-buttons .wb-mode-icon {
+  font-size: 13px; /* ring = 2em = 26px */
+  vertical-align: middle;
+}
+
+.wb-mode-buttons .wb-mode-inner {
+  font-size: 0.9em; /* the thin outline ring leaves a large hollow centre for the glyph */
+}
+
+/* the play triangle is visually left-heavy — nudge it to optically centre in the ring */
+.wb-mode-buttons .wb-mode-play {
+  margin-left: 1px;
+}
+
+.wb-mode-buttons button + button {
+  margin-left: -1px; /* collapse the shared border between segments */
+}
+
+.wb-mode-buttons button:first-child {
+  border-radius: 2px 0 0 2px;
+}
+
+.wb-mode-buttons button:last-child {
+  border-radius: 0 2px 2px 0;
+}
+
+/* raise the hovered / active segment so its (accent) border paints over the neighbour's */
 .wb-mode-buttons button:hover {
-  background: #f0f0f0;
+  color: var(--wb-accent);
+  z-index: 1;
 }
 
 .wb-mode-buttons button.active {
-  background: #4285f4;
-  border-color: #4285f4;
+  background: var(--wb-accent-strong);
+  border-color: var(--wb-accent-strong);
   color: #fff;
+  z-index: 1;
 }
 
-/* push the diagram-js palette below the mode buttons */
+/* push the diagram-js palette below the mode buttons, with a clean gap between them */
 .djs-palette {
-  top: 48px;
+  top: 70px;
 }
 
 
+/* File toolbar (load / save / export / zoom): the diagram-js **palette** visual language — a light-grey
+   bordered bar whose icon entries turn the accent colour on hover (no background change). It sits
+   bottom-right **behind** the bpmn.io watermark (z-index < the logo's 100), sized so the 53x21 logo lands
+   to the right of the buttons, vertically centred on the same baseline. The logo stays at its
+   vendor-required bottom:15px/right:15px — we align the bar to it, never move it. */
 #custom-controls {
   position: absolute;
-  bottom: 5px;
-  right: 4px;
-  width: 250px;
-  height: 50px;
+  right: 8px;
+  bottom: 8px;
   z-index: 10;
 }
 
 #custom-controls > ul {
-  background: #FAFAFA;
-  height: 50px;
-  border: solid 1px #CCC;
-  border-radius: 2px;
-
-  padding-top: 5px!important;
-  padding-bottom: 5px!important;
-  padding-left:10px!important;
+  display: inline-flex;
+  align-items: center;
+  height: 35px;          /* bottom 8 + 35/2 = 25.5 = the logo's vertical centre (bottom 15 + 21/2) */
   margin: 0;
+  padding: 0 62px 0 0;   /* reserve the right end for the bpmn.io logo (53px + gap) */
   list-style: none;
-}
-
-#custom-controls > ul {
-  padding: 0px;
-  margin: 0px;
-  display: flex;
+  background: var(--wb-grey-97);
+  border: 1px solid var(--wb-grey-75);
+  border-radius: 2px;
 }
 
 #custom-controls > ul > li {
-  display: inline-block;
-  margin: 0px;
-  padding: 7.25px;
-  line-height: 20px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+  padding: 0 9px;
+  cursor: pointer;
 }
 
-#custom-controls > ul > li > a {
-  color: black;
-  display: inline-block;
-  padding: 0px;
-  background: none!important;
-  border: none!important;
-  opacity: 1;
-}
-
+#custom-controls > ul > li > a,
 #custom-controls > ul > li > label {
-  padding: 0px;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  color: var(--wb-grey-15);
+  font-size: 16px;
+  cursor: pointer;
 }
 
-#custom-controls > ul > li:hover {
-  background-color: lightgray;
+#custom-controls > ul > li:hover > a,
+#custom-controls > ul > li:hover > label {
+  color: var(--wb-accent);
 }
 
 #custom-controls > ul > li > label > input {
-  width:24px;
-  height:24px;
+  width: 24px;
+  height: 24px;
 }
 
 .bjs-breadcrumbs {
