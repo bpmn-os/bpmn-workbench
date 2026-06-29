@@ -1,0 +1,341 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body,
+html {
+
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  font-size: 12px;
+
+  height: 100%;
+  max-height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+a:link {
+  text-decoration: none;
+}
+
+.content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  > .message {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    display: table;
+
+    font-size: 16px;
+    color: #111;
+
+    .note {
+      vertical-align: middle;
+      text-align: center;
+      display: table-cell;
+    }
+
+    &.error {
+      .details {
+        max-width: 500px;
+        font-size: 12px;
+        margin: 20px auto;
+        text-align: left;
+        color: #BD2828;
+      }
+
+      pre {
+        border: solid 1px #BD2828;
+        background: #fefafa;
+        padding: 10px;
+        color: #BD2828;
+      }
+    }
+  }
+  &:not(.with-error) .error,
+  &.with-error .intro,
+  &.with-diagram .intro {
+    display: none;
+  }
+
+  .canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .canvas,
+  #side-panel {
+    display: none;
+  }
+
+  &.with-diagram {
+    .canvas,
+    #side-panel  {
+      display: block;
+    }
+  }
+}
+
+
+.buttons {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+
+  padding: 0;
+  margin: 0;
+  list-style: none;
+
+  > li {
+    display: inline-block;
+    margin-right: 10px;
+
+    > a {
+      background: #DDD;
+      border: solid 1px #666;
+      display: inline-block;
+      padding: 5px;
+    }
+  }
+
+  a {
+    opacity: 0.3;
+  }
+
+  a.active {
+    opacity: 1.0;
+  }
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+}
+
+#leftbox {
+    position: relative;
+    flex: 1 1 auto;
+    height: 100%;
+    min-width: 350px;
+}
+
+#side-panel {
+    flex: 0 0 auto;
+    width: 320px;
+    height: 100%;
+    background-color: #f8f8f8;
+    overflow: hidden;
+}
+
+
+#canvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* The canvas <svg> is focusable; on first focus the browser paints its native focus ring
+   (a red 1px border in some themes). It's the canvas keyboard-focus cue, not a BPMN
+   selection, and looks inconsistent — hide it. */
+.djs-container svg:focus {
+    outline: none;
+}
+
+
+/* On-canvas mode buttons (top-left, above the palette). Greyed = Model mode. */
+.wb-mode-buttons {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 11;
+  display: flex;
+  gap: 4px;
+}
+
+.wb-mode-buttons button {
+  font: inherit;
+  padding: 5px 10px;
+  border: solid 1px #ccc;
+  border-radius: 3px;
+  background: #fff;
+  color: #999;
+  cursor: pointer;
+}
+
+.wb-mode-buttons button:hover {
+  background: #f0f0f0;
+}
+
+.wb-mode-buttons button.active {
+  background: #4285f4;
+  border-color: #4285f4;
+  color: #fff;
+}
+
+/* push the diagram-js palette below the mode buttons */
+.djs-palette {
+  top: 48px;
+}
+
+
+#custom-controls {
+  position: absolute;
+  bottom: 5px;
+  right: 4px;
+  width: 250px;
+  height: 50px;
+  z-index: 10;
+}
+
+#custom-controls > ul {
+  background: #FAFAFA;
+  height: 50px;
+  border: solid 1px #CCC;
+  border-radius: 2px;
+
+  padding-top: 5px!important;
+  padding-bottom: 5px!important;
+  padding-left:10px!important;
+  margin: 0;
+  list-style: none;
+}
+
+#custom-controls > ul {
+  padding: 0px;
+  margin: 0px;
+  display: flex;
+}
+
+#custom-controls > ul > li {
+  display: inline-block;
+  margin: 0px;
+  padding: 7.25px;
+  line-height: 20px;
+}
+
+#custom-controls > ul > li > a {
+  color: black;
+  display: inline-block;
+  padding: 0px;
+  background: none!important;
+  border: none!important;
+  opacity: 1;
+}
+
+#custom-controls > ul > li > label {
+  padding: 0px;
+}
+
+#custom-controls > ul > li:hover {
+  background-color: lightgray;
+}
+
+#custom-controls > ul > li > label > input {
+  width:24px;
+  height:24px;
+}
+
+.bjs-breadcrumbs {
+  top: auto;
+  left: 20px!important;
+  bottom: 10px!important;
+}
+
+.fileContainer {
+  overflow: hidden;
+  position: relative;
+}
+
+.fileContainer [type=file] {
+  cursor: inherit;
+  display: block;
+  font-size: 999px;
+  filter: alpha(opacity=0);
+  min-height: 100%;
+  min-width: 100%;
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  text-align: right;
+  top: 0;
+}
+
+/* Make the "Show issues" toggle look like a properties-panel header bar,
+   with the switch vertically centered. */
+.bjs-side-panel-pane[data-tab="issues"] .bio-properties-panel-toggle-switch-entry {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  max-height: 64px;
+  margin: 0;
+  padding: 16px 10px;
+  font-size: var(--text-size-base);
+  background-color: var(--header-background-color);
+  border-top: 1px solid var(--header-bottom-border-color);
+  border-bottom: 1px solid var(--header-bottom-border-color);
+}
+
+/* CSS hacks for property panel and linting */
+
+.bjs-side-panel-pane[data-tab="issues"] > .bio-properties-panel {
+  display: unset;
+  position: unset;
+  height: unset;
+  width: unset;
+  overflow: unset;
+}
+
+
+.bio-properties-panel {
+  --toggle-switch-on-background-color: #52b415;
+}
+
+.bio-properties-panel-group-header {
+  position: static;
+}
+
+
+.bio-properties-panel-header {
+  min-height: 64px;
+  border-top: 1px solid var(--header-bottom-border-color);
+}
+
+.bio-properties-panel-scroll-container {
+  overflow-x: unset;
+  overflow-y: unset;
+}
+
+.bjsl-button, .bjsl-issues-bottom-right {
+  display: none;
+}
+
+/* Hide the rule id/path in the canvas marker tooltip — a technical detail irrelevant to users. */
+.bjsl-overlay .rule {
+  display: none;
+}
+
+/* The tooltip box has a fixed min-width sized for the (now hidden) rule; let it fit the message. */
+.bjsl-overlay .bjsl-dropdown-content {
+  min-width: 0;
+}
+
+/* Each issue box has a full 1px border, so stacked boxes (and the first box vs. the
+   toggle header) double up. Drop the top border so every boundary is a single bottom
+   border; the header's bottom border provides the line above the first box. */
+.bjs-side-panel-pane[data-tab="issues"] #issueList .bjsl-issues {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+

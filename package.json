@@ -1,0 +1,60 @@
+{
+  "name": "bpmn-workbench",
+  "version": "0.0.0",
+  "description": "An educational BPMN modelling + simulation workbench, and the home of the essential model-checking rules and the issues panel",
+  "main": "src/app.js",
+  "exports": {
+    "./rules": "./src/modules/rules/index.js",
+    "./rules/*": "./src/modules/rules/*",
+    "./issues": "./src/modules/issues/index.js",
+    "./issues/*": "./src/modules/issues/*"
+  },
+  "scripts": {
+    "start": "run-s bundle dev",
+    "dev": "run-p watch:js watch:css serve",
+    "watch:js": "webpack -c webpack.config.js --watch",
+    "watch:css": "node scripts/watch-less.mjs",
+    "serve": "sirv dist --dev",
+    "bundle": "run-s bundle:*",
+    "bundle:less": "lessc src/app.less dist/app.css",
+    "bundle:js": "webpack -c webpack.config.js",
+    "test": "echo \"no tests yet\" && exit 0"
+  },
+  "author": {
+    "name": "Asvin Goel"
+  },
+  "contributors": [
+    {
+      "name": "bpmn.io contributors",
+      "url": "https://github.com/bpmn-io"
+    }
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bpmn-js": "^18.19.0",
+    "bpmn-js-animation": "file:../bpmn-js-animation",
+    "bpmn-js-bpmnlint": "^0.24.0",
+    "bpmn-js-side-panel": "github:bpmn-os/bpmn-js-side-panel#0f7cf244b680656f1e92dbad195b3bff361c2fed",
+    "bpmnlint": "^10.3.0",
+    "bpmnlint-utils": "^1.1.1",
+    "diagram-js": "^15.18.0",
+    "inherits": "^2.0.4",
+    "min-dom": "^5.0.0",
+    "tiny-svg": "^4.1.4"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^14.0.0",
+    "css-loader": "^7.1.4",
+    "less": "^4.6.7",
+    "less-loader": "^12.2.0",
+    "npm-run-all": "^4.1.5",
+    "raw-loader": "^4.0.2",
+    "sirv-cli": "^3.0.1",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.108.1",
+    "webpack-cli": "^7.1.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
