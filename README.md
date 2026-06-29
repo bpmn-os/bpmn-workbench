@@ -2,6 +2,8 @@
 
 A BPMN modeller for educational purpose with model checker and simulation.
 
+Available online at [bpmn-os.github.io/bpmn-workbench](https://bpmn-os.github.io/bpmn-workbench/).
+
 The workbench supports three activities on a single process model: editing the model, simulating its
 execution by advancing tokens along the sequence flows, and replaying a recorded execution. A model
 checker reports issues continuously while editing. Its rules are opinionated and stricter than the BPMN
