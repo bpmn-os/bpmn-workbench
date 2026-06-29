@@ -29,7 +29,12 @@ var modeler = new BpmnModeler({
     bpmnlint: getLintConfig()
   },
   sidePanel: {
-    parent: '#side-panel'
+    parent: '#side-panel',
+    // app identity + source link, shown in the side-panel header (above the tabs)
+    header: '<span class="wb-brand-name">BPMN Workbench</span>'
+      + '<a class="wb-brand-gh" href="https://github.com/bpmn-os/bpmn-workbench" target="_blank"'
+      + ' rel="noopener" title="View source on GitHub" aria-label="GitHub repository">'
+      + '<i class="fab fa-github"></i></a>'
   },
   additionalModules: [
     SidePanelModule,
