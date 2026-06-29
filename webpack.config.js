@@ -33,7 +33,7 @@ module.exports = {
         { from: 'node_modules/bpmn-js-bpmnlint/dist/assets/css', to: 'vendor/bpmn-js-bpmnlint/' },
         { from: 'node_modules/bpmn-js-side-panel/assets/side-panel.css', to: 'vendor/bpmn-js-side-panel/' },
         { from: 'node_modules/bpmn-js-animation/assets/animation.css', to: 'vendor/bpmn-js-animation/' },
-        { from: 'node_modules/bpmn-js-animation/assets/simulation-panel.css', to: 'vendor/bpmn-js-animation/' }
+        { from: 'node_modules/bpmn-js-animation/assets/token-panel.css', to: 'vendor/bpmn-js-animation/' }
       ]
     })
   ]

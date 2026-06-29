@@ -9,7 +9,10 @@ export default function(modeler, parent) {
   parent.innerHTML +=
          `<div class="wb-issues">
             <label class="wb-issues-header">
-              <input id="lintingToggle" type="checkbox" checked>
+              <span class="wb-toggle">
+                <input id="lintingToggle" type="checkbox" checked>
+                <span class="wb-toggle-slider"></span>
+              </span>
               <span>Show issues</span>
             </label>
             <div id="issueList"></div>
@@ -42,26 +45,33 @@ export default function(modeler, parent) {
 
   eventBus.on('linting.completed', function(event) {
     const issueList = document.getElementById("issueList");
-    if ( issueList ) {
-      let html = '';
-      for (var id in event.issues) {
-        html += html = '<div class="bjsl-issues" data-id="' + id + '"><div class="bjsl-current-element-issues"><div style="font-weight:bold;">' + id + '</div><ul>';
-        for (var i = 0; i < event.issues[id].length; i++) {
-          html += '<li class="' + event.issues[id][i].category + '">' + (event.issues[id][i].category == 'error' ? error : warning) + event.issues[id][i].message + '</li>';
+    if ( !issueList ) {
+      return;
+    }
+    const ids = Object.keys(event.issues || {});
+    if ( !ids.length ) {
+      issueList.innerHTML = '<div class="wb-issues-empty">No issues found.</div>';
+      return;
+    }
+    let html = '';
+    for (const id of ids) {
+      html += '<div class="bjsl-issues" data-id="' + id + '"><div class="bjsl-current-element-issues"><div class="wb-issue-id">' + id + '</div><ul>';
+      for (let i = 0; i < event.issues[id].length; i++) {
+        const issue = event.issues[id][i];
+        html += '<li class="' + issue.category + '">' + (issue.category == 'error' ? error : warning) + issue.message + '</li>';
+      }
+      html += '</ul></div></div>';
+    }
+    issueList.innerHTML = html;
+    for (let i = 0; i < issueList.children.length; i++) {
+      issueList.children[i].addEventListener("click", function() {
+        const element = elementRegistry.get(this.getAttribute("data-id"));
+        canvas.setRootElement(canvas.findRoot(element));
+        selectionService.select(element);
+        if (element.type == 'bpmn:Process') {
+          contextPad.close(element);
         }
-        html += '</ul></div></div></div>';
-      }
-      issueList.innerHTML = html;
-      for (var i = 0; i < issueList.children.length; i++) {
-        issueList.children[i].addEventListener ("click", function() {
-          const element = elementRegistry.get(this.getAttribute("data-id"));
-          canvas.setRootElement(canvas.findRoot(element));
-          selectionService.select(element);
-          if (element.type == 'bpmn:Process') {
-            contextPad.close(element);
-          }
-        });
-      }
+      });
     }
   });
 
