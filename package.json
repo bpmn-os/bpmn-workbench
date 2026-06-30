@@ -32,7 +32,7 @@
   "license": "MIT",
   "dependencies": {
     "bpmn-js": "^18.19.0",
-    "bpmn-js-animation": "github:bpmn-os/bpmn-js-animation#a04676cf3a180c59a78fea998d575ab9392bf1b0",
+    "bpmn-js-animation": "github:bpmn-os/bpmn-js-animation#9736f5ecbc35f912dbb770a264e988410edd16d1",
     "bpmn-js-bpmnlint": "^0.24.0",
     "bpmn-js-side-panel": "github:bpmn-os/bpmn-js-side-panel#0f7cf244b680656f1e92dbad195b3bff361c2fed",
     "bpmnlint": "^10.3.0",
