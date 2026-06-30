@@ -108,7 +108,7 @@
   },
   "essential/structural-anomaly": {
     "severity": "warn",
-    "description": "The control flow is not structurally sound as split and join do not match, so the process can deadlock or leave tokens unsynchronised. Pair each split with a join of the same type.",
+    "description": "The control flow appears to have an overly complex structure that can probably be simplified.",
     "subtypes": {
       "deadlock": {
         "description": "An exclusive split creates a token on only one outgoing sequence flow, but a parallel join waits for a token on every incoming flow. The join never receives all its tokens, so it blocks and the process deadlocks. Use matching gateway types."
