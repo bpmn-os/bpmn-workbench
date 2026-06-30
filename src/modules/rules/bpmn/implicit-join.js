@@ -20,7 +20,8 @@ module.exports = function() {
     const incoming = node.incoming || [];
 
     if (incoming.length > 1) {
-      reporter.report(node.id, 'Incoming flows join implicitly');
+      const subtype = is(node, 'bpmn:Activity') ? 'activity' : 'event';
+      reporter.report(node.id, 'Incoming flows join implicitly', { subtype });
     }
   }
 

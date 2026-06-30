@@ -14,6 +14,18 @@ import {
  * current mode. They also bring the matching side-panel tab to the front (Issues in Model, Simulation
  * otherwise).
  */
+// The composite mode icon (a thin outline ring with an inner glyph) as an HTML string, so the on-canvas
+// buttons and the Tokens-panel "model" note use the exact same visuals. `inner` is the FontAwesome
+// glyph class(es): 'fa-hand-pointer' (Simulation) or 'fa-play wb-mode-play' (Playback). Pass `mode`
+// ('simulate'|'playback') to make the icon a clickable mode switch (the TokenPanel wires data-set-mode).
+export function modeIcon(inner, mode) {
+  const attr = mode ? ' data-set-mode="' + mode + '"' : '';
+  return '<span class="fa-stack wb-mode-icon"' + attr + '>'
+    + '<i class="far fa-circle fa-stack-2x"></i>'
+    + '<i class="fas ' + inner + ' fa-stack-1x wb-mode-inner"></i>'
+    + '</span>';
+}
+
 export default function installModeButtons(modeler) {
   const mode = modeler.get('mode');
   const canvas = modeler.get('canvas');
@@ -25,18 +37,8 @@ export default function installModeButtons(modeler) {
   // in the tooltips.
   const el = domify(`
     <div class="wb-mode-buttons">
-      <button type="button" data-mode="simulate" title="Simulation">
-        <span class="fa-stack wb-mode-icon">
-          <i class="far fa-circle fa-stack-2x"></i>
-          <i class="fas fa-hand-pointer fa-stack-1x wb-mode-inner"></i>
-        </span>
-      </button>
-      <button type="button" data-mode="playback" title="Playback">
-        <span class="fa-stack wb-mode-icon">
-          <i class="far fa-circle fa-stack-2x"></i>
-          <i class="fas fa-play fa-stack-1x wb-mode-inner wb-mode-play"></i>
-        </span>
-      </button>
+      <button type="button" data-mode="simulate" title="Simulation">${modeIcon('fa-hand-pointer')}</button>
+      <button type="button" data-mode="playback" title="Playback">${modeIcon('fa-play wb-mode-play')}</button>
     </div>
   `);
   container.appendChild(el);

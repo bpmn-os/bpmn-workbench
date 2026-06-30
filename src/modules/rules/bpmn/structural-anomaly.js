@@ -437,11 +437,11 @@ module.exports = function () {
 
             if ( graph[predecessorId].fork != graph[id].merge ) {
               if ( graph[predecessorId].predecessors.length ) {
-                reporter.report(nodeId, "Not symmetric with '" + predecessorId + "'");
-                reporter.report(predecessorId, "Not symmetric with '" + nodeId + "'");
+                reporter.report(nodeId, "Not symmetric with '" + predecessorId + "'", { subtype: 'inconsistent-gateway' });
+                reporter.report(predecessorId, "Not symmetric with '" + nodeId + "'", { subtype: 'inconsistent-gateway' });
               }
               else {
-                reporter.report(nodeId, "Non-exclusive merge of alternative flows");
+                reporter.report(nodeId, "Non-exclusive merge of alternative flows", { subtype: 'race' });
               }
             }
 
@@ -500,11 +500,11 @@ module.exports = function () {
                 case Mode.INCONSISTENT:
                   // Report inconsistencies
                   if ( graph[startId].predecessors.length ) {
-                    reporter.report(graph[endId].node.id,"Inconsistent block starting with '" + startId + "'");
-                    reporter.report(startId,"Inconsistent block ending with '" + graph[endId].node.id + "'");
+                    reporter.report(graph[endId].node.id,"Inconsistent block starting with '" + startId + "'", { subtype: 'inconsistent-gateway' });
+                    reporter.report(startId,"Inconsistent block ending with '" + graph[endId].node.id + "'", { subtype: 'inconsistent-gateway' });
                   }
                   else {
-                    reporter.report(graph[endId].node.id,"Inconsistent initial block");
+                    reporter.report(graph[endId].node.id,"Inconsistent initial block", { subtype: 'inconsistent-gateway' });
                   }
                   if ( DEBUG ) console.log("Remove inconsistent block", block);
                   break;
@@ -659,7 +659,7 @@ module.exports = function () {
       if ( graph[nodeId].predecessors.every(el => !block.includes(el) || escapes[el].length == 0) ) {
         if ( graph[nodeId].merge && graph[nodeId].merge != PARALLEL ) {
           if ( reporter ) {
-            reporter.report(graph[nodeId].node.id,"Inconsistent merge, use parallel merge instead");
+            reporter.report(graph[nodeId].node.id,"Inconsistent merge, use parallel merge instead", { subtype: 'inconsistent-gateway' });
           }
           else {
             return false;
@@ -673,13 +673,13 @@ module.exports = function () {
               for ( let j in graph[nodeId].predecessors ) {
                 let predecessorId = graph[nodeId].predecessors[j];
                 for ( let k in escapes[predecessorId] ) {
-                  reporter.report(graph[nodeId].node.id, "Required token may be lost at '" + escapes[predecessorId][k] + "'");
-                  reporter.report(escapes[predecessorId][k], "May lose token required by  '" + graph[nodeId].node.id + "'");
+                  reporter.report(graph[nodeId].node.id, "Required token may be lost at '" + escapes[predecessorId][k] + "'", { subtype: 'token-loss' });
+                  reporter.report(escapes[predecessorId][k], "May lose token required by  '" + graph[nodeId].node.id + "'", { subtype: 'token-loss' });
                 }
               }
             }
             else {
-              reporter.report(graph[nodeId].node.id,"Inconsistent merge, use inclusive merge instead");
+              reporter.report(graph[nodeId].node.id,"Inconsistent merge, use inclusive merge instead", { subtype: 'inconsistent-gateway' });
             }
           }
           else {

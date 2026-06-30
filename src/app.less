@@ -19,6 +19,7 @@
   --wb-icon: rgb(64, 64, 64); /* the bpmn.io logo grey — used for the chrome icons/buttons */
   --wb-error: hsl(360, 100%, 45%);
   --wb-warning: #f7c71a;
+  --wb-info: hsl(205, 100%, 45%); /* matches the canvas bpmnlint info marker (blue) */
 
   /* the side-panel module's active-tab accent defaults to green — unify it to the blue accent */
   --bjs-side-panel-accent: var(--wb-accent-strong);
@@ -224,18 +225,19 @@ a:link {
 }
 
 /* composite mode icon: a thin outline ring (fa-stack-2x) with a small centred inner glyph (fa-stack-1x).
-   Both inherit the button's colour (grey / accent on hover / white when active). */
-.wb-mode-buttons .wb-mode-icon {
+   Both inherit the surrounding colour (button: grey / accent on hover / white when active). Not scoped to
+   the buttons so the same icon can appear inline in the Tokens-panel "model" note. */
+.wb-mode-icon {
   font-size: 13px; /* ring = 2em = 26px */
   vertical-align: middle;
 }
 
-.wb-mode-buttons .wb-mode-inner {
+.wb-mode-inner {
   font-size: 0.9em; /* the thin outline ring leaves a large hollow centre for the glyph */
 }
 
 /* the play triangle is visually left-heavy — nudge it to optically centre in the ring */
-.wb-mode-buttons .wb-mode-play {
+.wb-mode-play {
   margin-left: 1px;
 }
 
@@ -446,10 +448,92 @@ a:link {
   gap: 4px;
   padding: 2px 0;
   line-height: 1.4;
+  white-space: normal; /* override the vendored bpmnlint `.bjsl-issues li { white-space: nowrap }` so text wraps */
 }
 
-#issueList li.error .icon.error { color: var(--wb-error); }
-#issueList li.warning .icon.warning { color: var(--wb-warning); }
+/* colour by the icon span's class (always error/warning/info) — the <li> uses bpmnlint's category which
+   is "warn", not "warning", so keying off the li class left the warning circle uncoloured (black) */
+#issueList .icon.error { color: var(--wb-error); }
+#issueList .icon.warning { color: var(--wb-warning); }
+#issueList .icon.info { color: var(--wb-info); }
+
+/* message head + (collapsed) rationale stacked to the right of the severity icon */
+.wb-issue-body {
+  flex: 1;
+  min-width: 0;
+}
+
+/* the message line: severity icon + text + an optional expand caret on the right */
+.wb-issue-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* centre the severity icon on the line (its svg would otherwise sit on the text baseline → too low) */
+.wb-issue-head .icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.wb-issue-msg {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* caret that reveals the rationale — the properties-panel / Tokens group arrow (right when collapsed,
+   rotates to down when expanded); same rounded hover target + grey fill */
+.wb-issue-caret {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  fill: var(--wb-grey-35);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.wb-issue-caret:hover {
+  background: var(--wb-grey-95);
+}
+
+#issueList li.expanded .wb-issue-caret {
+  transform: rotate(90deg);
+}
+
+/* the "why it's poor practice" rationale — hidden until expanded, wraps to the panel width */
+.wb-issue-why {
+  display: none;
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--wb-grey-55);
+  overflow-wrap: break-word;
+}
+
+/* the spec citation under the rationale (plain text, or a link when a url is given) */
+.wb-issue-ref {
+  margin-top: 4px;
+}
+
+.wb-issue-ref a {
+  color: var(--wb-accent);
+}
+
+#issueList li.expanded .wb-issue-why {
+  display: block;
+}
+
+/* count badge on the Issues tab (errors → red, warnings-only → amber) */
+/* plain "(k)" issue count appended to the Issues tab label (hidden when zero, set in JS) */
+.wb-tab-badge {
+  margin-left: 4px;
+  color: var(--wb-grey-55);
+}
 
 /* bpmn-js-bpmnlint's own bottom-right panel + per-issue buttons aren't used here */
 .bjsl-button, .bjsl-issues-bottom-right {

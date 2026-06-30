@@ -34,5 +34,9 @@ IssuesPanel.prototype._init = function() {
   // createLintControls expects a `modeler`-like object exposing `.get(name)`; the diagram-js injector
   // provides exactly that. Use the non-strict form so an optional service (e.g. contextPad in a bare
   // viewer) resolves to null instead of throwing at init.
-  createLintControls({ get: (name) => this._injector.get(name, false) }, pane);
+  createLintControls(
+    { get: (name) => this._injector.get(name, false) },
+    pane,
+    { descriptions: this._config.descriptions } // rule-id → "why" rationale (optional)
+  );
 };

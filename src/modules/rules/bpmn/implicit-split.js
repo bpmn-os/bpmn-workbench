@@ -24,7 +24,8 @@ module.exports = function() {
     });
 
     if (outgoingWithoutCondition.length > 1) {
-      reporter.report(node.id, 'Outgoing flows split implicitly');
+      const subtype = is(node, 'bpmn:Activity') ? 'activity' : 'event';
+      reporter.report(node.id, 'Outgoing flows split implicitly', { subtype });
     }
   }
 

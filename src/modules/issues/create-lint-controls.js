@@ -1,10 +1,17 @@
-export default function(modeler, parent) {
+export default function(modeler, parent, options = {}) {
   const linting = modeler.get('linting');
   const eventBus = modeler.get('eventBus');
   const elementRegistry = modeler.get('elementRegistry');
   const selectionService = modeler.get('selection');
   const canvas = modeler.get('canvas');
   const contextPad = modeler.get('contextPad');
+  // bpmn-js-bpmnlint routes every issue message through the `translate` service (for its own canvas
+  // overlays); honour it here too, so a host that overrides/localises messages via translate sees them
+  // in this panel as well.
+  const translate = modeler.get('translate', false) || (s => s);
+
+  // rule-id -> short "why it's poor practice" rationale (optional); rendered under each issue message
+  const descriptions = options.descriptions || {};
 
   parent.innerHTML +=
          `<div class="wb-issues">
@@ -30,9 +37,32 @@ export default function(modeler, parent) {
     }
   });
 
-  const error = '<span class="icon error"> <svg width="12" height="12" version="1.1" viewBox="0 0 352 512" xmlns="http://www.w3.org/2000/svg" style="margin: auto;text-align: center;"><path d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z" fill="currentColor"></path></svg></span>&nbsp;';
+  // panel severity icons mirror the canvas markers: a colored circle (currentColor, set per severity via
+  // CSS) with a white glyph — error ✗, warning !, info i.
+  const error = '<span class="icon error"> <svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="margin: auto;text-align: center;"><circle cx="8" cy="8" r="8" fill="currentColor"></circle><path d="M5.3 5.3L10.7 10.7M10.7 5.3L5.3 10.7" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none"></path></svg></span>&nbsp;';
 
-  const warning = '<span class="icon warning"> <svg width="12" height="12" version="1.1" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" style="margin: auto;text-align: center;">  <path d="m256 323.95c-45.518 0-82.419 34.576-82.419 77.229 0 42.652 36.9 77.229 82.419 77.229 45.518 0 82.419-34.577 82.419-77.23 0-42.652-36.9-77.229-82.419-77.229zm-80.561-271.8 11.61 204.35c.544 9.334 8.78 16.64 18.755 16.64h100.39c9.975 0 18.211-7.306 18.754-16.64l11.611-204.35c.587-10.082-7.98-18.56-18.754-18.56h-123.62c-10.775 0-19.34 8.478-18.753 18.56z" fill="currentColor"></path></svg></span>&nbsp;';
+  const warning = '<span class="icon warning"> <svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="margin: auto;text-align: center;"><circle cx="8" cy="8" r="8" fill="currentColor"></circle><rect x="7.1" y="3.5" width="1.8" height="5.5" rx="0.6" fill="#fff"></rect><circle cx="8" cy="11.7" r="1.05" fill="#fff"></circle></svg></span>&nbsp;';
+
+  const info = '<span class="icon info"> <svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="margin: auto;text-align: center;"><circle cx="8" cy="8" r="8" fill="currentColor"></circle><rect x="7" y="7" width="2" height="5" rx="0.5" fill="#fff"></rect><circle cx="8" cy="4.3" r="1.15" fill="#fff"></circle></svg></span>&nbsp;';
+
+  // a count badge on the "Issues" side-panel tab — at-a-glance feedback without opening the tab. Red
+  // when any errors, amber when only warnings, blue when only info, hidden when clean (or linting off).
+  // getTab() doesn't expose the tab <button>, so find it in the DOM by its data-tab attribute
+  const tabButton = document.querySelector('.bjs-side-panel-tab[data-tab="issues"]');
+  const badge = document.createElement('span');
+  badge.className = 'wb-tab-badge';
+  badge.style.display = 'none';
+  if (tabButton) {
+    tabButton.appendChild(badge);
+  }
+  function setBadge(errors, warnings, infos) {
+    const total = errors + warnings + infos;
+    badge.style.display = total ? '' : 'none';          // no "(0)" when clean
+    badge.textContent = total ? '(' + total + ')' : '';  // plain count in parentheses
+    badge.title = errors + ' error' + (errors === 1 ? '' : 's')
+      + ', ' + warnings + ' warning' + (warnings === 1 ? '' : 's')
+      + ', ' + infos + ' info';
+  }
 
   eventBus.on('linting.toggle', function(event) {
     if ( !event.active ) {
@@ -40,6 +70,7 @@ export default function(modeler, parent) {
       if ( issueList ) {
         issueList.innerHTML = "";
       }
+      setBadge(0, 0, 0);
     }
   });
 
@@ -51,18 +82,55 @@ export default function(modeler, parent) {
     const ids = Object.keys(event.issues || {});
     if ( !ids.length ) {
       issueList.innerHTML = '<div class="wb-issues-empty">No issues found.</div>';
+      setBadge(0, 0, 0);
       return;
     }
     let html = '';
+    let errors = 0, warnings = 0, infos = 0;
     for (const id of ids) {
       html += '<div class="bjsl-issues" data-id="' + id + '"><div class="bjsl-current-element-issues"><div class="wb-issue-id">' + id + '</div><ul>';
       for (let i = 0; i < event.issues[id].length; i++) {
         const issue = event.issues[id][i];
-        html += '<li class="' + issue.category + '">' + (issue.category == 'error' ? error : warning) + issue.message + '</li>';
+        if (issue.category === 'error') { errors++; }
+        else if (issue.category === 'info') { infos++; }
+        else { warnings++; }
+        // a rule may tag a finding with a `subtype` (report(id, msg, { subtype })) for a more specific
+        // rationale; fall back to the rule-level entry. Each entry is { description, reference, url }.
+        const entry = (issue.subtype && descriptions[issue.rule + '/' + issue.subtype])
+          || descriptions[issue.rule] || {};
+        const why = entry.description;
+        const ref = entry.reference;
+        const detail = why || ref;
+        html += '<li class="' + issue.category + '">'
+          + '<span class="wb-issue-body">'
+          + '<span class="wb-issue-head">' + (issue.category == 'error' ? error : (issue.category == 'info' ? info : warning))
+          + '<span class="wb-issue-msg">' + translate(issue.message) + '</span>'
+          + (detail ? '<span class="wb-issue-caret" title="Why is this flagged?">'
+            + '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M10,12 L3,12 C2.44771525,12 2,11.5522847 2,11 C2,10.4477153 2.44771525,10 3,10 L8,10 L8,5 C8,4.44771525 8.44771525,4 9,4 C9.55228475,4 10,4.44771525 10,5 L10,12 Z" transform="rotate(-45 6 8)"></path></svg>'
+            + '</span>' : '')
+          + '</span>'
+          + (detail ? '<div class="wb-issue-why">'
+            + (why || '')
+            + (ref ? '<div class="wb-issue-ref">' + (entry.url
+                ? '<a href="' + entry.url + '" target="_blank" rel="noopener">' + ref + '</a>'
+                : ref) + '</div>' : '')
+            + '</div>' : '')
+          + '</span></li>';
       }
       html += '</ul></div></div>';
     }
     issueList.innerHTML = html;
+    setBadge(errors, warnings, infos);
+    // caret toggles each issue's "why" rationale; stop the click so it doesn't also select the element
+    issueList.querySelectorAll('.wb-issue-caret').forEach(function(caret) {
+      caret.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const li = this.closest('li');
+        if (li) {
+          li.classList.toggle('expanded');
+        }
+      });
+    });
     for (let i = 0; i < issueList.children.length; i++) {
       issueList.children[i].addEventListener("click", function() {
         const element = elementRegistry.get(this.getAttribute("data-id"));

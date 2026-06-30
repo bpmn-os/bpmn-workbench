@@ -3,7 +3,7 @@ import BpmnModeler from 'bpmn-js/lib/Modeler';
 import EventSubProcessPaletteModule from './modules/event-subprocess'; // "Create expanded event sub-process" palette entry
 
 import LintModule from 'bpmn-js-bpmnlint';
-import getLintConfig from './modules/rules';     // the essential, bpmn-os–agnostic lint rules
+import getLintConfig, { essentialDescriptions } from './modules/rules'; // essential lint rules + rationales (incl. spec refs)
 import IssuesPanelModule from './modules/issues'; // self-registering "Issues" side-panel tab
 
 import SidePanelModule from 'bpmn-js-side-panel';
@@ -17,7 +17,7 @@ import {
   ModeModule
 } from 'bpmn-js-animation';
 
-import installModeButtons from './mode-buttons';
+import installModeButtons, { modeIcon } from './mode-buttons';
 
 import sampleProcess from './newDiagram.bpmn';
 
@@ -27,6 +27,15 @@ var modeler = new BpmnModeler({
   container: '#canvas',
   linting: {
     bpmnlint: getLintConfig()
+  },
+  issuesPanel: {
+    descriptions: essentialDescriptions // show each rule's "why it's poor practice" rationale
+  },
+  tokenPanel: {
+    // shown in the Tokens tab while in Model mode — points at the on-canvas mode buttons (same icons)
+    modelNote: 'Click ' + modeIcon('fa-hand-pointer', 'simulate')
+      + ' to start/end a user-controlled simulation, or ' + modeIcon('fa-play wb-mode-play', 'playback')
+      + ' to start/end playback of execution logs.'
   },
   sidePanel: {
     parent: '#side-panel',

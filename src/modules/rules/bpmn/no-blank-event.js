@@ -5,16 +5,27 @@ const {
 
 
 /**
- * A rule that verifies that an event contains one event definition.
+ * Flags events that should declare a type (event definition), by element kind:
+ *  - intermediate (throw/catch): stricter than the spec, which allows an untyped none throw event;
+ *  - boundary: an untyped boundary event catches nothing;
+ *  - event-sub-process start: must be triggered by a typed start event.
  */
 module.exports = function() {
 
   function check(node, reporter) {
-    if ( ( isAny(node, ['bpmn:IntermediateThrowEvent','bpmn:IntermediateCatchEvent','bpmn:BoundaryEvent'])
-                || ( is(node, 'bpmn:StartEvent') && node.$parent.triggeredByEvent ) 
-              ) && (!node.eventDefinitions || !node.eventDefinitions.length) 
-    ) {
-      reporter.report(node.id, 'Event has no event definition');
+    const blank = !node.eventDefinitions || !node.eventDefinitions.length;
+    if (!blank) {
+      return;
+    }
+
+    if (isAny(node, ['bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent'])) {
+      reporter.report(node.id, 'Untyped intermediate event', { subtype: 'intermediate' });
+    }
+    else if (is(node, 'bpmn:BoundaryEvent')) {
+      reporter.report(node.id, 'Untyped boundary event', { subtype: 'boundary' });
+    }
+    else if (is(node, 'bpmn:StartEvent') && node.$parent && node.$parent.triggeredByEvent) {
+      reporter.report(node.id, 'Untyped start event in event sub-process', { subtype: 'event-sub-process-start' });
     }
   }
 
