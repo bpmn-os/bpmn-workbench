@@ -18,7 +18,7 @@
     "bundle": "run-s bundle:*",
     "bundle:less": "lessc src/app.less dist/app.css",
     "bundle:js": "webpack -c webpack.config.js",
-    "test": "echo \"no tests yet\" && exit 0"
+    "test": "node --test test/*.test.mjs"
   },
   "author": {
     "name": "Asvin Goel"
@@ -43,6 +43,8 @@
     "tiny-svg": "^4.1.4"
   },
   "devDependencies": {
+    "bpmn-auto-layout": "^1.3.0",
+    "bpmn-moddle": "^10.0.0",
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.1.4",
     "less": "^4.6.7",

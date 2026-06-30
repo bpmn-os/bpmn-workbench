@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="d" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn2:process id="P" isExecutable="false">
+    <bpmn2:startEvent id="S" />
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_P">
+    <bpmndi:BPMNPlane id="BPMNPlane_P" bpmnElement="P">
+      <bpmndi:BPMNShape id="S_di" bpmnElement="S">
+        <dc:Bounds x="57" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>

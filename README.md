@@ -7,8 +7,8 @@ Available online at [bpmn-os.github.io/bpmn-workbench](https://bpmn-os.github.io
 The workbench supports three activities on a single process model: editing the model, simulating its
 execution by advancing tokens along the sequence flows, and replaying a recorded execution. A model
 checker reports issues continuously while editing. Its rules are opinionated and stricter than the BPMN
-specification: they report constructs that can be considered poor modelling practice even if they are 
-syntactically valid but.
+specification: they report constructs that can be considered poor modelling practice even if they are
+syntactically valid.
 
 The application is built on [bpmn-js](https://github.com/bpmn-io/bpmn-js); token animation and the side
 panel are provided by [bpmn-js-animation](https://github.com/bpmn-os/bpmn-js-animation) and
@@ -29,6 +29,7 @@ In addition to the application, this repository provides two reusable modules:
 npm install
 npm start        # build, then watch (webpack + lessc) and serve dist/
 npm run bundle   # one-off production build → dist/
+npm test         # run the lint-rule regression tests (see test/README.md)
 ```
 
 ## License

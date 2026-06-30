@@ -13,6 +13,7 @@ import implicitSplit from "./bpmn/implicit-split";
 import implicitJoin from "./bpmn/implicit-join";
 import flowConditions from "./bpmn/flow-conditions"; // conditional/default flow out of a non-gateway (info)
 import cycle from "./bpmn/cycle";
+import complexGateway from "./bpmn/complex-gateway";       // any complex gateway (warn)
 import structuralAnomaly from "./bpmn/structural-anomaly";
 import nonInterruptingBoundaryEvent from "./bpmn/non-interrupting-boundary-event";
 import processStartEvent from "./bpmn/process-start-event";             // process: multiple start events (info)
@@ -35,6 +36,7 @@ export const essentialRules = {
     "implicit-join": implicitJoin,
     "flow-conditions": flowConditions,
     "cycle": cycle,
+    "complex-gateway": complexGateway,
     "structural-anomaly": structuralAnomaly,
     "non-interrupting-boundary-event": nonInterruptingBoundaryEvent,
     "process-start-event": processStartEvent,

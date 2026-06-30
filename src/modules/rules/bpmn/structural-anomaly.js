@@ -60,6 +60,25 @@ module.exports = function () {
     INCONSISTENT: 4
   }
 
+  // Conceptual outcome of an unsound split/join, reported as the issue subtype.
+  const MESSAGES = {
+    deadlock: 'Deadlock',                       // certain: the structural mismatch always deadlocks
+    'possible-deadlock': 'Possible deadlock',   // conditional: an escapable branch may not deliver a token
+    race: 'Race condition',                     // certain: concurrent branches always merge unsynchronised
+    'possible-race': 'Race hazard',             // conditional: branches that may or may not run
+    mismatch: 'Mismatched split and join',
+    overcomplex: 'Overly complex structure'
+  };
+
+  // Classify a split type against the join that closes it.
+  function behaviour( forkType, mergeType ) {
+    if ( forkType === PARALLEL && mergeType === EXCLUSIVE ) return 'race';              // all branches into a per-token merge: always races
+    if ( forkType === EXCLUSIVE && mergeType === PARALLEL ) return 'deadlock';          // one branch into a parallel join: always deadlocks
+    if ( forkType === INCLUSIVE && mergeType === EXCLUSIVE ) return 'possible-race';    // may activate >1 branch into a per-token merge
+    if ( forkType === INCLUSIVE && mergeType === PARALLEL ) return 'possible-deadlock'; // may activate <all branches into a parallel join
+    return 'mismatch';
+  }
+
   let graph = {};
 
   function check(node, reporter) {
@@ -82,6 +101,10 @@ module.exports = function () {
       graph = buildAcyclicGraph( startingNodes, boundaryEvents );
       if ( DEBUG ) console.log("Initial", startingNodes, graph);
 
+      // A complex gateway makes the control flow undecidable by structure. It is flagged by the
+      // complex-gateway rule, so skip structural analysis of any container that uses one.
+      if ( Object.values(graph).some(n => n.fork === COMPLEX || n.merge === COMPLEX) ) return;
+
       validate( graph, reporter );
       if ( DEBUG ) console.log("Final", graph);
     }
@@ -98,7 +121,7 @@ module.exports = function () {
     simplifyGraph( graph, reporter );
 
     for (let id in graph) {
-      reporter.report(id, 'Structural anomaly');
+      reporter.report(id, MESSAGES.overcomplex, { subtype: 'overcomplex' });
     }
   }
 
@@ -436,12 +459,21 @@ module.exports = function () {
             if ( DEBUG ) console.log("Remove multiple flows between", predecessorId, id);
 
             if ( graph[predecessorId].fork != graph[id].merge ) {
-              if ( graph[predecessorId].predecessors.length ) {
-                reporter.report(nodeId, "Not symmetric with '" + predecessorId + "'", { subtype: 'inconsistent-gateway' });
-                reporter.report(predecessorId, "Not symmetric with '" + nodeId + "'", { subtype: 'inconsistent-gateway' });
-              }
-              else {
-                reporter.report(nodeId, "Non-exclusive merge of alternative flows", { subtype: 'race' });
+              const subtype = behaviour( graph[predecessorId].fork, graph[id].merge );
+              if ( subtype ) {
+                if ( graph[predecessorId].predecessors.length ) {
+                  if ( subtype === 'mismatch' ) { // symmetric: neither end is the origin
+                    reporter.report(nodeId, MESSAGES[subtype] + " with '" + predecessorId + "'", { subtype });
+                    reporter.report(predecessorId, MESSAGES[subtype] + " with '" + nodeId + "'", { subtype });
+                  }
+                  else { // directional: originates at the split, manifests at the join
+                    reporter.report(nodeId, MESSAGES[subtype] + " originating from '" + predecessorId + "'", { subtype });
+                    reporter.report(predecessorId, MESSAGES[subtype] + " at '" + nodeId + "'", { subtype });
+                  }
+                }
+                else {
+                  reporter.report(nodeId, MESSAGES[subtype], { subtype });
+                }
               }
             }
 
@@ -500,11 +532,11 @@ module.exports = function () {
                 case Mode.INCONSISTENT:
                   // Report inconsistencies
                   if ( graph[startId].predecessors.length ) {
-                    reporter.report(graph[endId].node.id,"Inconsistent block starting with '" + startId + "'", { subtype: 'inconsistent-gateway' });
-                    reporter.report(startId,"Inconsistent block ending with '" + graph[endId].node.id + "'", { subtype: 'inconsistent-gateway' });
+                    reporter.report(graph[endId].node.id, MESSAGES.mismatch + " with '" + startId + "'", { subtype: 'mismatch' });
+                    reporter.report(startId, MESSAGES.mismatch + " with '" + graph[endId].node.id + "'", { subtype: 'mismatch' });
                   }
                   else {
-                    reporter.report(graph[endId].node.id,"Inconsistent initial block", { subtype: 'inconsistent-gateway' });
+                    reporter.report(graph[endId].node.id, MESSAGES.mismatch, { subtype: 'mismatch' });
                   }
                   if ( DEBUG ) console.log("Remove inconsistent block", block);
                   break;
@@ -659,7 +691,7 @@ module.exports = function () {
       if ( graph[nodeId].predecessors.every(el => !block.includes(el) || escapes[el].length == 0) ) {
         if ( graph[nodeId].merge && graph[nodeId].merge != PARALLEL ) {
           if ( reporter ) {
-            reporter.report(graph[nodeId].node.id,"Inconsistent merge, use parallel merge instead", { subtype: 'inconsistent-gateway' });
+            reporter.report(graph[nodeId].node.id, MESSAGES.race + ', use a parallel merge instead', { subtype: 'race' });
           }
           else {
             return false;
@@ -673,13 +705,16 @@ module.exports = function () {
               for ( let j in graph[nodeId].predecessors ) {
                 let predecessorId = graph[nodeId].predecessors[j];
                 for ( let k in escapes[predecessorId] ) {
-                  reporter.report(graph[nodeId].node.id, "Required token may be lost at '" + escapes[predecessorId][k] + "'", { subtype: 'token-loss' });
-                  reporter.report(escapes[predecessorId][k], "May lose token required by  '" + graph[nodeId].node.id + "'", { subtype: 'token-loss' });
+                  reporter.report(graph[nodeId].node.id, MESSAGES['possible-deadlock'] + ", required token may be lost at '" + escapes[predecessorId][k] + "'", { subtype: 'possible-deadlock' });
+                  reporter.report(escapes[predecessorId][k], MESSAGES['possible-deadlock'] + ", may lose token required by '" + graph[nodeId].node.id + "'", { subtype: 'possible-deadlock' });
                 }
               }
             }
             else {
-              reporter.report(graph[nodeId].node.id,"Inconsistent merge, use inclusive merge instead", { subtype: 'inconsistent-gateway' });
+              // an exclusive merge reconverging the parallel split's branches; an escaping branch may
+              // thin them out, so the race only may occur. Its origin is the parallel split, not the escape.
+              reporter.report(graph[nodeId].node.id, MESSAGES['possible-race'] + " originating from '" + graph[startId].node.id + "'", { subtype: 'possible-race' });
+              reporter.report(graph[startId].node.id, MESSAGES['possible-race'] + " at '" + graph[nodeId].node.id + "'", { subtype: 'possible-race' });
             }
           }
           else {

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="d" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn2:process id="P" isExecutable="false">
+    <bpmn2:task id="A">
+      <bpmn2:outgoing>f1</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:sequenceFlow id="f1" sourceRef="A" targetRef="E" />
+    <bpmn2:endEvent id="E">
+      <bpmn2:incoming>f1</bpmn2:incoming>
+    </bpmn2:endEvent>
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_P">
+    <bpmndi:BPMNPlane id="BPMNPlane_P" bpmnElement="P">
+      <bpmndi:BPMNShape id="A_di" bpmnElement="A">
+        <dc:Bounds x="25" y="30" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="E_di" bpmnElement="E">
+        <dc:Bounds x="207" y="52" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="f1_di" bpmnElement="f1">
+        <di:waypoint x="125" y="70" />
+        <di:waypoint x="207" y="70" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>

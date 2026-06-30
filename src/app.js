@@ -134,22 +134,56 @@ function loadBPMN(URL) {
   xhttp.send();
 }
 
+// File open/save. Prefer the File System Access API: a shared picker id makes the browser remember
+// the last-used folder across open and save (and across sessions). Firefox/Safari lack the API, so
+// we fall back to the native <input> for open and a download link for save.
+// Diagram open/save share one id; SVG export keeps its own id so each remembers its own folder.
+var BPMN_PICKER_ID = 'bpmn-workbench';
+var SVG_PICKER_ID = 'bpmn-workbench-svg';
+var BPMN_TYPES = [ { description: 'BPMN diagram', accept: { 'application/xml': [ '.bpmn', '.xml' ] } } ];
+var SVG_TYPES = [ { description: 'SVG image', accept: { 'image/svg+xml': [ '.svg' ] } } ];
+var hasOpenPicker = typeof window.showOpenFilePicker === 'function';
+var hasSavePicker = typeof window.showSaveFilePicker === 'function';
+
+function ignoreAbort(err) {            // the user dismissed the dialog
+  if (err && err.name !== 'AbortError') console.warn(err);
+}
+
+async function openWithPicker() {
+  var [ handle ] = await window.showOpenFilePicker({ id: BPMN_PICKER_ID, types: BPMN_TYPES });
+  var file = await handle.getFile();
+  modelName = file.name.replace(/\.[^.]+$/, '');
+  show(await file.text());
+}
+
+async function saveWithPicker(id, suggestedName, types, text) {
+  var handle = await window.showSaveFilePicker({ id: id, suggestedName: suggestedName, types: types });
+  var writable = await handle.createWritable();
+  await writable.write(text);
+  await writable.close();
+}
+
 var uploadBPMN = document.getElementById('js-upload-bpmn');
 if (uploadBPMN) {
-  uploadBPMN.value = '';
-  uploadBPMN.addEventListener('change', function(event) {
-    var file = event.target.files[0];
-    var reader = new FileReader();
-    reader.onload = function() {
-      show(reader.result);
-    };
-    reader.onerror = function(err) {
-      console.log(err, err.loaded, err.loaded === 0, file);
-    };
-
-    reader.readAsText(event.target.files[0]);
-    modelName = event.target.files[0].name.split('.')[0];
-  });
+  var uploadInput = uploadBPMN.querySelector('input[type="file"]');
+  if (hasOpenPicker) {
+    // intercept the label so the native <input> never opens; use the remembered-folder picker instead
+    if (uploadInput) uploadInput.style.display = 'none';
+    uploadBPMN.addEventListener('click', function(event) {
+      event.preventDefault();
+      openWithPicker().catch(ignoreAbort);
+    });
+  }
+  else if (uploadInput) {
+    uploadInput.addEventListener('change', function(event) {
+      var file = event.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function() { show(reader.result); };
+      reader.onerror = function(err) { console.log(err, err.loaded, err.loaded === 0, file); };
+      reader.readAsText(file);
+      modelName = file.name.split('.')[0];
+    });
+  }
 }
 
 var downloadBPMN = document.getElementById('js-download-bpmn');
@@ -158,7 +192,12 @@ var downloadSVG = document.getElementById('js-download-svg');
 if (downloadBPMN) {
   downloadBPMN.addEventListener('click', function() {
     modeler.saveXML({ format: true }).then( function(model) {
-      downloadXML(modelName + '.bpmn', model.xml);
+      if (hasSavePicker) {
+        saveWithPicker(BPMN_PICKER_ID, modelName + '.bpmn', BPMN_TYPES, model.xml).catch(ignoreAbort);
+      }
+      else {
+        downloadXML(modelName + '.bpmn', model.xml);
+      }
     } );
     return false;
   });
@@ -166,7 +205,12 @@ if (downloadBPMN) {
 if (downloadSVG) {
   downloadSVG.addEventListener('click', function() {
     modeler.saveSVG({ format: true }).then( function(model) {
-      downloadXML(modelName + '.svg', model.svg);
+      if (hasSavePicker) {
+        saveWithPicker(SVG_PICKER_ID, modelName + '.svg', SVG_TYPES, model.svg).catch(ignoreAbort);
+      }
+      else {
+        downloadXML(modelName + '.svg', model.svg);
+      }
     });
     return false;
   });
