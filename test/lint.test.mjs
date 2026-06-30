@@ -39,6 +39,8 @@ const blockCases = [
   ['block-inclusive-parallel',        ['possible-deadlock', 'possible-deadlock']], // inclusive split may under-feed a synchronising join
   ['block-parallel-exclusive-escape', ['possible-race', 'possible-race']],          // escapable branch into a per-token merge (merge + escape)
   ['block-parallel-parallel-escape',  ['possible-deadlock', 'possible-deadlock']], // escapable branch may starve a synchronising join
+  ['block-inclusive-exclusive-escape',['possible-race', 'possible-race']],         // inclusive split + escape into a per-token merge
+  ['block-inclusive-parallel-escape', ['possible-deadlock', 'possible-deadlock']], // inclusive split + escape into a synchronising join
   ['block-exclusive-inclusive',       ['mismatch', 'mismatch']],                   // exclusive split closed by an inclusive merge
   ['block-parallel-inclusive',        ['mismatch', 'mismatch']],                   // parallel split closed by an inclusive merge
   ['block-complex-exclusive',         []],                                         // complex is ignored here (see complex-gateway)

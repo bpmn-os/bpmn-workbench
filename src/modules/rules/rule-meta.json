@@ -123,7 +123,7 @@
         "description": "More than one branch leading to an exclusive merge may receive a token, and the merge passes on each token it receives, so the flow after the merge may run more than once. Use an inclusive merge."
       },
       "mismatch": {
-        "description": "Split and join are of different types. Use matching gateway types to improve readability."
+        "description": "Avoid inconsistent blocks to improve readability and guard against issues such as deadlocks or race hazards."
       },
       "overcomplex": {
         "description": "The control flow could not be reduced to properly nested splits and joins, so its soundness cannot be determined. Simplify it into matching split and join blocks."

@@ -66,7 +66,7 @@ module.exports = function () {
     'possible-deadlock': 'Possible deadlock',   // conditional: an escapable branch may not deliver a token
     race: 'Race condition',                     // certain: concurrent branches always merge unsynchronised
     'possible-race': 'Race hazard',             // conditional: branches that may or may not run
-    mismatch: 'Mismatched split and join',
+    mismatch: 'Inconsistent gateway types',
     overcomplex: 'Overly complex structure'
   };
 
@@ -462,9 +462,9 @@ module.exports = function () {
               const subtype = behaviour( graph[predecessorId].fork, graph[id].merge );
               if ( subtype ) {
                 if ( graph[predecessorId].predecessors.length ) {
-                  if ( subtype === 'mismatch' ) { // symmetric: neither end is the origin
-                    reporter.report(nodeId, MESSAGES[subtype] + " with '" + predecessorId + "'", { subtype });
-                    reporter.report(predecessorId, MESSAGES[subtype] + " with '" + nodeId + "'", { subtype });
+                  if ( subtype === 'mismatch' ) { // a reduced block with inconsistent gateway types
+                    reporter.report(nodeId, MESSAGES.mismatch + " in block starting at '" + predecessorId + "'", { subtype });
+                    reporter.report(predecessorId, MESSAGES.mismatch + " in block ending at '" + nodeId + "'", { subtype });
                   }
                   else { // directional: originates at the split, manifests at the join
                     reporter.report(nodeId, MESSAGES[subtype] + " originating from '" + predecessorId + "'", { subtype });
@@ -529,17 +529,27 @@ module.exports = function () {
                   updateBlockEscapes(block,graph);
                   if ( DEBUG ) console.log("Remove inclusive block", block);
                   break;
-                case Mode.INCONSISTENT:
-                  // Report inconsistencies
+                case Mode.INCONSISTENT: {
+                  // classify the inconsistent block by its fork/join behaviour (e.g. an inclusive split
+                  // with an escaping branch is still a possible race/deadlock); fall back to a plain mismatch
+                  const subtype = behaviour( graph[startId].fork, graph[endId].merge ) || 'mismatch';
+                  const endNodeId = graph[endId].node.id;
                   if ( graph[startId].predecessors.length ) {
-                    reporter.report(graph[endId].node.id, MESSAGES.mismatch + " with '" + startId + "'", { subtype: 'mismatch' });
-                    reporter.report(startId, MESSAGES.mismatch + " with '" + graph[endId].node.id + "'", { subtype: 'mismatch' });
+                    if ( subtype === 'mismatch' ) {
+                      reporter.report(endNodeId, MESSAGES.mismatch + " in block starting at '" + startId + "'", { subtype });
+                      reporter.report(startId, MESSAGES.mismatch + " in block ending at '" + endNodeId + "'", { subtype });
+                    }
+                    else {
+                      reporter.report(endNodeId, MESSAGES[subtype] + " originating from '" + startId + "'", { subtype });
+                      reporter.report(startId, MESSAGES[subtype] + " at '" + endNodeId + "'", { subtype });
+                    }
                   }
                   else {
-                    reporter.report(graph[endId].node.id, MESSAGES.mismatch, { subtype: 'mismatch' });
+                    reporter.report(endNodeId, MESSAGES[subtype], { subtype });
                   }
                   if ( DEBUG ) console.log("Remove inconsistent block", block);
                   break;
+                }
                 default:
               }
 
