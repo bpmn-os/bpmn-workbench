@@ -132,7 +132,7 @@
   },
   "essential/non-interrupting-boundary-event": {
     "severity": "warn",
-    "description": "Non-interrupting boundary events cause race hazards as they can be triggered multiple times."
+    "description": "Non-interrupting boundary events cause race hazards as they can be triggered multiple times. Consider using a non-interrupting event-subprocess instead."
   },
   "essential/process-start-event": {
     "severity": "info",
