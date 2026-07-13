@@ -4,6 +4,8 @@ import {
   event as domEvent
 } from 'min-dom';
 
+import './mode-buttons.css';
+
 /**
  * On-canvas mode buttons for the workbench — two mutually-exclusive buttons, **Simulation** and
  * **Playback**, placed top-left on the canvas (above the palette). Greyed by default = **Model**
@@ -26,7 +28,7 @@ export function modeIcon(inner, mode) {
     + '</span>';
 }
 
-export default function installModeButtons(modeler) {
+export default function createModeButtons(modeler) {
   const mode = modeler.get('mode');
   const canvas = modeler.get('canvas');
   const sidePanel = modeler.get('sidePanel', false);

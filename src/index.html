@@ -17,45 +17,9 @@
 <style></style>
 </head>
 <body>
-<div class="container">
-  <div id="leftbox"> 
-    <div class="canvas" id="canvas"></div>
-    <div id="custom-controls">
-     <ul>
-      <li>
-        <label class="fileContainer"  id="js-upload-bpmn">
-          <i class="fas fa-upload"></i>
-          <input type="file" title="upload BPMN diagram" accept=".bpmn"/>
-        </label>
-      </li><li>
-        <a id="js-download-bpmn" href title="download BPMN diagram" onclick='return false;'>
-          <i class="fas fa-download"></i>
-        </a>
-      </li><li>
-        <a id="js-download-svg" href title="download as SVG image" onclick='return false;'>
-          <i class="fas fa-image"></i>
-        </a>
-      </li><li>
-        <a id="js-center" href title="center" onclick='return false;' >
-          <i class="fas fa-arrows-alt"></i>
-        </a>
-      </li><li>
-        <a id="js-zoom-in" href title="zoom in" onclick='return false;' >
-          <i class="fas fa-search-plus"></i>
-        </a>
-      </li><li>
-        <a id="js-zoom-out" href title="zoom out" onclick='return false;' >
-          <i class="fas fa-search-minus"></i>
-        </a>
-      </li>
-     </ul>
-    </div>
-  </div>
-  <div id="side-panel"></div>
+<div class="bpmn-ui">
+  <div class="canvas" id="canvas"></div>
+  <div class="side-panel" id="side-panel"></div>
 </div>
   <script src="app.js"></script>
-
-<script>
-
-</script>
 </html>

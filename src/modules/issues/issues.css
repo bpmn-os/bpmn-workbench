@@ -1,0 +1,239 @@
+/* Styling for the Issues side-panel tab (the markup produced by create-issues.js) and the
+   related bpmn-js-bpmnlint canvas overlay tweaks. Shipped with the module (imported by
+   create-issues.js) so a host gets it for free.
+
+   Greys and the accent come from the shared side-panel palette (--bjs-*, defined in
+   bpmn-js-side-panel's side-panel.css), referenced with a fallback so the panel still looks right if
+   that stylesheet is absent. Only the issue-severity colours are owned here — they are specific to the
+   Issues panel — and are overridable via --bpmn-issues-error/-warning/-info. */
+:root {
+  --bpmn-issues-error: hsl(360, 100%, 45%);
+  --bpmn-issues-warning: #f7c71a;
+  --bpmn-issues-info: hsl(205, 100%, 45%); /* matches the canvas bpmnlint info marker (blue) */
+}
+
+/* The issues markup is authored for border-box sizing; the host no longer sets a global reset, so scope
+   it here. This keeps the "Show issues" header exactly 64px (padding included) — the same height as the
+   properties-panel and token-panel headers. */
+.bpmn-issues,
+.bpmn-issues * {
+  box-sizing: border-box;
+}
+
+/* "Show issues" — a properties-panel-style header bar (64px tall, padding 16px 10px, grey-95
+   background, grey-75 bottom border) holding a sliding toggle. */
+.bpmn-issues-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 64px;
+  max-height: 64px;
+  padding: 16px 10px;
+  background-color: var(--bjs-grey-95, hsl(225, 10%, 95%));
+  border-bottom: 1px solid var(--bjs-grey-75, hsl(225, 10%, 75%));
+  cursor: pointer;
+}
+
+/* sliding toggle switch — replicates the bpmn properties-panel toggle (32x16, blue when on) */
+.bpmn-issues-toggle {
+  position: relative;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 16px;
+}
+
+.bpmn-issues-toggle input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.bpmn-issues-toggle-slider {
+  position: absolute;
+  inset: 0;
+  background-color: var(--bjs-grey-75, hsl(225, 10%, 75%));
+  border-radius: 34px;
+  transition: 0.3s;
+}
+
+.bpmn-issues-toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.bpmn-issues-toggle input:checked + .bpmn-issues-toggle-slider {
+  background-color: var(--bjs-accent-strong, hsl(205, 100%, 50%));
+}
+
+.bpmn-issues-toggle input:checked + .bpmn-issues-toggle-slider::before {
+  transform: translateX(16px);
+}
+
+/* empty state — muted italic */
+.bpmn-issues-empty {
+  padding: 10px 12px;
+  color: var(--bjs-grey-55, hsl(225, 10%, 55%));
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* the issue list: one group per element, separated by a single bottom rule */
+#issueList .bjsl-issues {
+  padding: 8px 12px;
+  border: none;
+  border-bottom: 1px solid var(--bjs-grey-90, hsl(225, 10%, 90%));
+}
+
+#issueList .bjsl-issues:hover {
+  background-color: var(--bjs-grey-95, hsl(225, 10%, 95%));
+  cursor: pointer;
+}
+
+.bpmn-issues-id {
+  font-weight: 600;
+  color: var(--bjs-grey-15, hsl(225, 10%, 15%));
+}
+
+#issueList ul {
+  margin: 4px 0 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+#issueList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 2px 0;
+  line-height: 1.4;
+  white-space: normal; /* override the vendored bpmnlint `.bjsl-issues li { white-space: nowrap }` so text wraps */
+}
+
+/* colour by the icon span's class (always error/warning/info) — the <li> uses bpmnlint's category which
+   is "warn", not "warning", so keying off the li class left the warning circle uncoloured (black) */
+#issueList .icon.error { color: var(--bpmn-issues-error); }
+#issueList .icon.warning { color: var(--bpmn-issues-warning); }
+#issueList .icon.info { color: var(--bpmn-issues-info); }
+
+/* message head + (collapsed) rationale stacked to the right of the severity icon */
+.bpmn-issues-body {
+  flex: 1;
+  min-width: 0;
+}
+
+/* the message line: severity icon + text + an optional expand caret on the right */
+.bpmn-issues-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* centre the severity icon on the line (its svg would otherwise sit on the text baseline → too low) */
+.bpmn-issues-head .icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.bpmn-issues-msg {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* caret that reveals the rationale — right when collapsed, rotates to down when expanded */
+.bpmn-issues-caret {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  fill: var(--bjs-grey-35, hsl(225, 10%, 35%));
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.bpmn-issues-caret:hover {
+  background: var(--bjs-grey-95, hsl(225, 10%, 95%));
+}
+
+#issueList li.expanded .bpmn-issues-caret {
+  transform: rotate(90deg);
+}
+
+/* the "why it's poor practice" rationale — hidden until expanded, wraps to the panel width */
+.bpmn-issues-why {
+  display: none;
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--bjs-grey-55, hsl(225, 10%, 55%));
+  overflow-wrap: break-word;
+}
+
+/* the spec citation under the rationale (plain text, or a link when a url is given) */
+.bpmn-issues-ref {
+  margin-top: 4px;
+}
+
+.bpmn-issues-ref a {
+  color: var(--bjs-accent, hsl(205, 100%, 45%));
+}
+
+#issueList li.expanded .bpmn-issues-why {
+  display: block;
+}
+
+/* plain "(k)" issue count appended to the Issues tab label (hidden when zero, set in JS) */
+.bpmn-issues-tab-badge {
+  margin-left: 4px;
+  color: var(--bjs-grey-55, hsl(225, 10%, 55%));
+}
+
+/* bpmn-js-bpmnlint's own bottom-right panel + per-issue buttons aren't used here */
+.bjsl-button, .bjsl-issues-bottom-right {
+  display: none;
+}
+
+/* Hide the rule id/path in the canvas marker tooltip — a technical detail irrelevant to users. */
+.bjsl-overlay .rule {
+  display: none;
+}
+
+/* The tooltip box has a fixed min-width sized for the (now hidden) rule; let it fit the message. */
+.bjsl-overlay .bjsl-dropdown-content {
+  min-width: 0;
+}
+
+/* Canvas outline for process-level issues (a plain process has no shape to mark). An overlay frame on
+   the canvas container, coloured by the worst severity; pointer-events: none so it doesn't block the
+   canvas. Set on the .djs-container by create-issues.js (markCanvas). */
+.bpmn-issues-canvas-error::after,
+.bpmn-issues-canvas-warning::after,
+.bpmn-issues-canvas-info::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  pointer-events: none;
+  border: 3px solid transparent;
+}
+
+.bpmn-issues-canvas-error::after   { border-color: var(--bpmn-issues-error); }
+.bpmn-issues-canvas-warning::after { border-color: var(--bpmn-issues-warning); }
+.bpmn-issues-canvas-info::after    { border-color: var(--bpmn-issues-info); }
+
+/* The canvas <svg> is focusable and paints a native focus ring — a rectangular outline at the canvas
+   edge that would clash with the process-issue outline above. Suppress it. */
+.djs-container svg:focus {
+  outline: none;
+}

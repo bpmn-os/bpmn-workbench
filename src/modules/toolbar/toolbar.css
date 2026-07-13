@@ -1,0 +1,63 @@
+/* File / view toolbar for a bpmn-js canvas — the light-grey "palette" visual language: a bordered bar
+   whose icon entries turn the accent colour on hover. It sits bottom-right inside the canvas container,
+   behind the bpmn.io watermark, sized so the 53x21 logo lands to its right on the same baseline.
+   Themable via the --bpmn-toolbar-* custom properties (sensible greys/blue by default). */
+
+/* Self-contained sizing: the bar's height/width include padding + border (the host sets no global
+   box-sizing reset), so it aligns exactly with the bpmn.io logo. */
+.bpmn-toolbar,
+.bpmn-toolbar * {
+  box-sizing: border-box;
+}
+
+.bpmn-toolbar {
+  position: absolute;
+  right: 8px;
+  bottom: 11px;
+  z-index: 10; /* below the bpmn.io logo (z-index 100) */
+}
+
+.bpmn-toolbar > ul {
+  display: inline-flex;
+  align-items: center;
+  height: 35px;          /* bottom 11 + 35/2 = 28.5 = the logo's vertical centre */
+  margin: 0;
+  padding: 0 62px 0 0;   /* reserve the right end for the bpmn.io logo (53px + gap) */
+  list-style: none;
+  background: var(--bpmn-toolbar-bg, hsl(225, 10%, 97%));
+  border: 1px solid var(--bpmn-toolbar-border, hsl(225, 10%, 75%));
+  border-radius: 2px;
+}
+
+.bpmn-toolbar > ul > li {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+  padding: 0 9px;
+  cursor: pointer;
+}
+
+.bpmn-toolbar > ul > li > a {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  color: var(--bpmn-toolbar-icon, rgb(64, 64, 64));
+  cursor: pointer;
+}
+
+.bpmn-toolbar > ul > li:hover > a {
+  color: var(--bpmn-toolbar-accent, hsl(205, 100%, 45%));
+}
+
+/* inline stroke icons inherit the surrounding colour */
+.bpmn-toolbar svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

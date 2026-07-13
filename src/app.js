@@ -1,9 +1,7 @@
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 
-import EventSubProcessPaletteModule from './modules/event-subprocess'; // "Create expanded event sub-process" palette entry
-
 import LintModule from 'bpmn-js-bpmnlint';
-import getLintConfig, { essentialDescriptions } from './modules/rules'; // essential lint rules + rationales (incl. spec refs)
+import getRules from './modules/rules'; // essential lint rules (the bundle carries their rationales)
 import IssuesPanelModule from './modules/issues'; // self-registering "Issues" side-panel tab
 
 import SidePanelModule from 'bpmn-js-side-panel';
@@ -17,19 +15,15 @@ import {
   ModeModule
 } from 'bpmn-js-animation';
 
-import installModeButtons, { modeIcon } from './mode-buttons';
+import createModeButtons, { modeIcon } from './mode-buttons';
+import createToolbar from './modules/toolbar'; // on-canvas file/view toolbar (open/save/export/zoom)
 
-import sampleProcess from './newDiagram.bpmn';
-
-var modelName = 'diagram';
+import newDiagram from './newDiagram.bpmn';
 
 var modeler = new BpmnModeler({
   container: '#canvas',
   linting: {
-    bpmnlint: getLintConfig()
-  },
-  issuesPanel: {
-    descriptions: essentialDescriptions // show each rule's "why it's poor practice" rationale
+    bpmnlint: getRules()  // the bundle carries rule descriptions; the Issues panel reads them itself
   },
   tokenPanel: {
     // shown in the Tokens tab while in Model mode — points at the on-canvas mode buttons (same icons)
@@ -39,15 +33,17 @@ var modeler = new BpmnModeler({
   },
   sidePanel: {
     parent: '#side-panel',
+    width: '320px',
     // app identity + source link, shown in the side-panel header (above the tabs)
-    header: '<span class="wb-brand-name">BPMN Workbench</span>'
+    header: '<div class="wb-brand">'
+      + '<span class="wb-brand-name">BPMN Workbench</span>'
       + '<a class="wb-brand-gh" href="https://github.com/bpmn-os/bpmn-workbench" target="_blank"'
       + ' rel="noopener" title="View source on GitHub" aria-label="GitHub repository">'
       + '<i class="fab fa-github"></i></a>'
+      + '</div>'
   },
   additionalModules: [
     SidePanelModule,
-    EventSubProcessPaletteModule,
     LintModule,
     IssuesPanelModule,        // → "Issues" tab
     SimulatorModule,
@@ -57,161 +53,26 @@ var modeler = new BpmnModeler({
   ]
 });
 
-modeler.importXML(sampleProcess);
+modeler.importXML(newDiagram);
 
 // the on-canvas Simulation / Playback buttons (Model = neither active)
-installModeButtons(modeler);
+createModeButtons(modeler);
 
-window.modeler = modeler;
+// On-canvas file/view toolbar (open, save, export SVG, centre, zoom) — the packaged toolbar module.
+createToolbar(modeler);
 
-var HIGH_PRIORITY = 100000;
-
-modeler.on('element.contextmenu', HIGH_PRIORITY, function(event) {
-  event.originalEvent.preventDefault();
-  event.originalEvent.stopPropagation();
-
-  return true;
-});
-
-function downloadXML(filename, text) {
-  var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/xml;charset=utf-8,' + encodeURIComponent(text));
-  element.setAttribute('download', filename);
-
-  element.style.display = 'none';
-  document.body.appendChild(element);
-
-  element.click();
-
-  document.body.removeChild(element);
-}
-
-var zoomIn = document.getElementById('js-zoom-in');
-var zoomOut = document.getElementById('js-zoom-out');
-var center = document.getElementById('js-center');
-
-if (zoomIn) {
-  zoomIn.addEventListener('click', function() {
-    modeler.get('zoomScroll').stepZoom(1);
-    return false;
-  });
-}
-if (zoomOut) {
-  zoomOut.addEventListener('click', function() {
-    modeler.get('zoomScroll').stepZoom(-1);
-    return false;
-  });
-}
-
-if (center) {
-  center.addEventListener('click', function() {
-    modeler.get('canvas').zoom('fit-viewport', 'auto');
-    return false;
-  });
-}
-
-function show(content) {
-  modeler.importXML(content);
-}
-
-var href = new URL(window.location.href);
-var src = href.searchParams.get('src');
+// Optional deep-linking: ?src=<url> loads a diagram on startup.
+var src = new URL(window.location.href).searchParams.get('src');
 if (src) {
-  loadBPMN(src);
-}
-
-function loadBPMN(URL) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      show(xhttp.responseText);
+      modeler.importXML(xhttp.responseText);
     }
-    else {
-      console.warn('Failed to get file. ReadyState: ' + xhttp.readyState + ', Status: ' + xhttp.status);
+    else if (this.readyState == 4) {
+      console.warn('Failed to load ' + src + ' (status ' + this.status + ')');
     }
   };
-  xhttp.open('GET',URL,true);
+  xhttp.open('GET', src, true);
   xhttp.send();
-}
-
-// File open/save. Prefer the File System Access API: a shared picker id makes the browser remember
-// the last-used folder across open and save (and across sessions). Firefox/Safari lack the API, so
-// we fall back to the native <input> for open and a download link for save.
-// Diagram open/save share one id; SVG export keeps its own id so each remembers its own folder.
-var BPMN_PICKER_ID = 'bpmn-workbench';
-var SVG_PICKER_ID = 'bpmn-workbench-svg';
-var BPMN_TYPES = [ { description: 'BPMN diagram', accept: { 'application/xml': [ '.bpmn', '.xml' ] } } ];
-var SVG_TYPES = [ { description: 'SVG image', accept: { 'image/svg+xml': [ '.svg' ] } } ];
-var hasOpenPicker = typeof window.showOpenFilePicker === 'function';
-var hasSavePicker = typeof window.showSaveFilePicker === 'function';
-
-function ignoreAbort(err) {            // the user dismissed the dialog
-  if (err && err.name !== 'AbortError') console.warn(err);
-}
-
-async function openWithPicker() {
-  var [ handle ] = await window.showOpenFilePicker({ id: BPMN_PICKER_ID, types: BPMN_TYPES });
-  var file = await handle.getFile();
-  modelName = file.name.replace(/\.[^.]+$/, '');
-  show(await file.text());
-}
-
-async function saveWithPicker(id, suggestedName, types, text) {
-  var handle = await window.showSaveFilePicker({ id: id, suggestedName: suggestedName, types: types });
-  var writable = await handle.createWritable();
-  await writable.write(text);
-  await writable.close();
-}
-
-var uploadBPMN = document.getElementById('js-upload-bpmn');
-if (uploadBPMN) {
-  var uploadInput = uploadBPMN.querySelector('input[type="file"]');
-  if (hasOpenPicker) {
-    // intercept the label so the native <input> never opens; use the remembered-folder picker instead
-    if (uploadInput) uploadInput.style.display = 'none';
-    uploadBPMN.addEventListener('click', function(event) {
-      event.preventDefault();
-      openWithPicker().catch(ignoreAbort);
-    });
-  }
-  else if (uploadInput) {
-    uploadInput.addEventListener('change', function(event) {
-      var file = event.target.files[0];
-      var reader = new FileReader();
-      reader.onload = function() { show(reader.result); };
-      reader.onerror = function(err) { console.log(err, err.loaded, err.loaded === 0, file); };
-      reader.readAsText(file);
-      modelName = file.name.split('.')[0];
-    });
-  }
-}
-
-var downloadBPMN = document.getElementById('js-download-bpmn');
-var downloadSVG = document.getElementById('js-download-svg');
-
-if (downloadBPMN) {
-  downloadBPMN.addEventListener('click', function() {
-    modeler.saveXML({ format: true }).then( function(model) {
-      if (hasSavePicker) {
-        saveWithPicker(BPMN_PICKER_ID, modelName + '.bpmn', BPMN_TYPES, model.xml).catch(ignoreAbort);
-      }
-      else {
-        downloadXML(modelName + '.bpmn', model.xml);
-      }
-    } );
-    return false;
-  });
-}
-if (downloadSVG) {
-  downloadSVG.addEventListener('click', function() {
-    modeler.saveSVG({ format: true }).then( function(model) {
-      if (hasSavePicker) {
-        saveWithPicker(SVG_PICKER_ID, modelName + '.svg', SVG_TYPES, model.svg).catch(ignoreAbort);
-      }
-      else {
-        downloadXML(modelName + '.svg', model.svg);
-      }
-    });
-    return false;
-  });
 }

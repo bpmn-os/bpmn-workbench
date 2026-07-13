@@ -17,6 +17,11 @@ module.exports = {
         use: [ 'style-loader', 'css-loader', 'less-loader' ]
       },
       {
+        // plain CSS imported from JS (e.g. the toolbar module ships its own stylesheet)
+        test: /\.css$/i,
+        use: [ 'style-loader', 'css-loader' ]
+      },
+      {
         test: /\.bpmn$/,
         use: { loader: 'raw-loader' }
       }

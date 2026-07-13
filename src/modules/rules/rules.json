@@ -1,5 +1,5 @@
 {
-  "essential/adhoc-subprocess": {
+  "bpmn/adhoc-subprocess.js": {
     "severity": "error",
     "subtypes": {
       "start-event": {
@@ -19,19 +19,19 @@
       }
     }
   },
-  "essential/implicit-start": {
+  "bpmn/implicit-start.js": {
     "severity": "info",
     "description": "A flow node without an incoming sequence flow is instantiated when the process starts. Use an explicit start event to improve clarity.",
     "reference": "BPMN 2.0.2, Start Event, p. 238",
     "url": "https://www.omg.org/spec/BPMN/2.0.2/PDF#page=268"
   },
-  "essential/implicit-end": {
+  "bpmn/implicit-end.js": {
     "severity": "info",
     "description": "A flow node without an outgoing sequence flow consumes its token upon completion. Use an explicit end event to improve clarity.",
     "reference": "BPMN 2.0.2, End Event, p. 246",
     "url": "https://www.omg.org/spec/BPMN/2.0.2/PDF#page=276"
   },
-  "essential/no-blank-event": {
+  "bpmn/no-blank-event.js": {
     "severity": "error",
     "subtypes": {
       "intermediate": {
@@ -51,7 +51,7 @@
       }
     }
   },
-  "essential/implicit-split": {
+  "bpmn/implicit-split.js": {
     "severity": "warn",
     "subtypes": {
       "activity": {
@@ -66,7 +66,7 @@
       }
     }
   },
-  "essential/implicit-join": {
+  "bpmn/implicit-join.js": {
     "severity": "warn",
     "subtypes": {
       "activity": {
@@ -81,7 +81,7 @@
       }
     }
   },
-  "essential/flow-conditions": {
+  "bpmn/flow-conditions.js": {
     "severity": "info",
     "subtypes": {
       "conditional": {
@@ -96,17 +96,17 @@
       }
     }
   },
-  "essential/cycle": {
+  "bpmn/cycle.js": {
     "severity": "warn",
     "description": "A cycle in the sequence flow can cause unintended side-effects (e.g. livelock or race hazard). Use a loop activity to guard against such problems.",
     "reference": "BPMN 2.0.2, Loop Activity, p. 432",
     "url": "https://www.omg.org/spec/BPMN/2.0.2/PDF#page=462"
   },
-  "essential/complex-gateway": {
+  "bpmn/complex-gateway.js": {
     "severity": "warn",
     "description": "Complex gateways should be avoided and can usually be replaced by a combination of exclusive, parallel, and inclusive gateways."
   },
-  "essential/structural-anomaly": {
+  "bpmn/structural-anomaly.js": {
     "severity": "warn",
     "description": "The control flow appears to have an overly complex structure that can probably be simplified.",
     "subtypes": {
@@ -130,17 +130,17 @@
       }
     }
   },
-  "essential/non-interrupting-boundary-event": {
+  "bpmn/non-interrupting-boundary-event.js": {
     "severity": "warn",
     "description": "Non-interrupting boundary events cause race hazards as they can be triggered multiple times. Consider using a non-interrupting event-subprocess instead."
   },
-  "essential/process-start-event": {
+  "bpmn/process-start-event.js": {
     "severity": "info",
     "description": "It is discouraged to use multiple start events.",
     "reference": "BPMN 2.0.2, Start Event, p. 239",
     "url": "https://www.omg.org/spec/BPMN/2.0.2/PDF#page=269"
   },
-  "essential/sub-process-start-event": {
+  "bpmn/sub-process-start-event.js": {
     "severity": "error",
     "subtypes": {
       "typed-start": {
@@ -155,13 +155,13 @@
       }
     }
   },
-  "essential/event-sub-process-start-event": {
+  "bpmn/event-sub-process-start-event.js": {
     "severity": "error",
     "description": "An event sub-process must have exactly one start event.",
     "reference": "BPMN 2.0.2, Start Events for Event Sub-Processes, p. 241",
     "url": "https://www.omg.org/spec/BPMN/2.0.2/PDF#page=271"
   },
-  "essential/no-duplicate-sequence-flows": {
+  "bpmn/no-duplicate-sequence-flows.js": {
     "severity": "error",
     "subtypes": {
       "race": {
@@ -175,7 +175,7 @@
       }
     }
   },
-  "essential/superfluous-gateway": {
+  "bpmn/superfluous-gateway.js": {
     "severity": "error",
     "description": "A gateway must have either multiple incoming sequence flows or multiple outgoing sequence flows (i.e., it must merge or split the flow).",
     "reference": "BPMN 2.0.2, Gateway, p. 289",

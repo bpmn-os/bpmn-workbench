@@ -1,5 +1,5 @@
 import IssuesPanel from './IssuesPanel';
-import createLintControls from './create-lint-controls';
+import createIssues from './create-issues';
 
 /**
  * Opt-in **Issues panel** — adds a self-registering "Issues" tab to a `bpmn-js-side-panel` (if present;
@@ -7,7 +7,7 @@ import createLintControls from './create-lint-controls';
  * also has the `linting` service (bpmn-js-bpmnlint) and a side panel.
  *
  * Exported as `bpmn-workbench/issues`. For a host that wants to place the controls itself (no side
- * panel), use the named `createLintControls(modeler, parentEl)` instead.
+ * panel), use the named `createIssues(modeler, parentEl)` instead.
  */
 export const IssuesPanelModule = {
   __init__: [ 'issuesPanel' ],
@@ -16,4 +16,4 @@ export const IssuesPanelModule = {
 
 export default IssuesPanelModule;
 
-export { createLintControls };
+export { createIssues };

@@ -1,3 +1,5 @@
+import './issues.css';
+
 export default function(modeler, parent, options = {}) {
   const linting = modeler.get('linting');
   const eventBus = modeler.get('eventBus');
@@ -13,12 +15,49 @@ export default function(modeler, parent, options = {}) {
   // rule-id -> short "why it's poor practice" rationale (optional); rendered under each issue message
   const descriptions = options.descriptions || {};
 
+  // In a collaboration a Participant (pool) has no process shape, so a process-level issue is attached to
+  // the participant. Show the referenced process id in the header (the issue is about the process), while
+  // the group's data-id stays the participant so click-to-select still hits the pool.
+  function displayId(id) {
+    const element = elementRegistry.get(id);
+    if (element && element.type === 'bpmn:Participant' && element.businessObject.processRef) {
+      return element.businessObject.processRef.id;
+    }
+    return id;
+  }
+
+  // A process that is the canvas root (a plain process, not a pool) has no shape, so bpmn-js-bpmnlint
+  // can't mark its issues on the diagram. Outline the whole canvas by the worst such severity instead.
+  // (In a collaboration the process is a pool, so the marker sits on the participant — no outline.)
+  const SEVERITY_RANK = { error: 3, warn: 2, info: 1 };
+  const CANVAS_CLASSES = [ 'bpmn-issues-canvas-error', 'bpmn-issues-canvas-warning', 'bpmn-issues-canvas-info' ];
+  function markCanvas(issues) {
+    const container = canvas.getContainer();
+    container.classList.remove(...CANVAS_CLASSES);
+    let worst = null;
+    for (const id of Object.keys(issues || {})) {
+      const element = elementRegistry.get(id);
+      if (!element || element.type !== 'bpmn:Process') {
+        continue;
+      }
+      for (const issue of issues[id]) {
+        const cat = issue.category === 'error' ? 'error' : issue.category === 'info' ? 'info' : 'warn';
+        if (!worst || SEVERITY_RANK[cat] > SEVERITY_RANK[worst]) {
+          worst = cat;
+        }
+      }
+    }
+    if (worst) {
+      container.classList.add('bpmn-issues-canvas-' + (worst === 'warn' ? 'warning' : worst));
+    }
+  }
+
   parent.innerHTML +=
-         `<div class="wb-issues">
-            <label class="wb-issues-header">
-              <span class="wb-toggle">
+         `<div class="bpmn-issues">
+            <label class="bpmn-issues-header">
+              <span class="bpmn-issues-toggle">
                 <input id="lintingToggle" type="checkbox" checked>
-                <span class="wb-toggle-slider"></span>
+                <span class="bpmn-issues-toggle-slider"></span>
               </span>
               <span>Show issues</span>
             </label>
@@ -50,7 +89,7 @@ export default function(modeler, parent, options = {}) {
   // getTab() doesn't expose the tab <button>, so find it in the DOM by its data-tab attribute
   const tabButton = document.querySelector('.bjs-side-panel-tab[data-tab="issues"]');
   const badge = document.createElement('span');
-  badge.className = 'wb-tab-badge';
+  badge.className = 'bpmn-issues-tab-badge';
   badge.style.display = 'none';
   if (tabButton) {
     tabButton.appendChild(badge);
@@ -71,6 +110,7 @@ export default function(modeler, parent, options = {}) {
         issueList.innerHTML = "";
       }
       setBadge(0, 0, 0);
+      markCanvas({});
     }
   });
 
@@ -79,16 +119,25 @@ export default function(modeler, parent, options = {}) {
     if ( !issueList ) {
       return;
     }
+    // linting.completed also fires while linting is toggled OFF (bpmn-js-bpmnlint re-lints on toggle);
+    // when inactive, render nothing and clear the canvas outline so "Show issues" off means off.
+    if ( !linting.isActive() ) {
+      issueList.innerHTML = "";
+      setBadge(0, 0, 0);
+      markCanvas({});
+      return;
+    }
     const ids = Object.keys(event.issues || {});
     if ( !ids.length ) {
-      issueList.innerHTML = '<div class="wb-issues-empty">No issues found.</div>';
+      issueList.innerHTML = '<div class="bpmn-issues-empty">No issues found.</div>';
       setBadge(0, 0, 0);
+      markCanvas({});
       return;
     }
     let html = '';
     let errors = 0, warnings = 0, infos = 0;
     for (const id of ids) {
-      html += '<div class="bjsl-issues" data-id="' + id + '"><div class="bjsl-current-element-issues"><div class="wb-issue-id">' + id + '</div><ul>';
+      html += '<div class="bjsl-issues" data-id="' + id + '"><div class="bjsl-current-element-issues"><div class="bpmn-issues-id">' + displayId(id) + '</div><ul>';
       for (let i = 0; i < event.issues[id].length; i++) {
         const issue = event.issues[id][i];
         if (issue.category === 'error') { errors++; }
@@ -102,16 +151,16 @@ export default function(modeler, parent, options = {}) {
         const ref = entry.reference;
         const detail = why || ref;
         html += '<li class="' + issue.category + '">'
-          + '<span class="wb-issue-body">'
-          + '<span class="wb-issue-head">' + (issue.category == 'error' ? error : (issue.category == 'info' ? info : warning))
-          + '<span class="wb-issue-msg">' + translate(issue.message) + '</span>'
-          + (detail ? '<span class="wb-issue-caret" title="Why is this flagged?">'
+          + '<span class="bpmn-issues-body">'
+          + '<span class="bpmn-issues-head">' + (issue.category == 'error' ? error : (issue.category == 'info' ? info : warning))
+          + '<span class="bpmn-issues-msg">' + translate(issue.message) + '</span>'
+          + (detail ? '<span class="bpmn-issues-caret" title="Why is this flagged?">'
             + '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M10,12 L3,12 C2.44771525,12 2,11.5522847 2,11 C2,10.4477153 2.44771525,10 3,10 L8,10 L8,5 C8,4.44771525 8.44771525,4 9,4 C9.55228475,4 10,4.44771525 10,5 L10,12 Z" transform="rotate(-45 6 8)"></path></svg>'
             + '</span>' : '')
           + '</span>'
-          + (detail ? '<div class="wb-issue-why">'
+          + (detail ? '<div class="bpmn-issues-why">'
             + (why || '')
-            + (ref ? '<div class="wb-issue-ref">' + (entry.url
+            + (ref ? '<div class="bpmn-issues-ref">' + (entry.url
                 ? '<a href="' + entry.url + '" target="_blank" rel="noopener">' + ref + '</a>'
                 : ref) + '</div>' : '')
             + '</div>' : '')
@@ -121,8 +170,9 @@ export default function(modeler, parent, options = {}) {
     }
     issueList.innerHTML = html;
     setBadge(errors, warnings, infos);
+    markCanvas(event.issues);
     // caret toggles each issue's "why" rationale; stop the click so it doesn't also select the element
-    issueList.querySelectorAll('.wb-issue-caret').forEach(function(caret) {
+    issueList.querySelectorAll('.bpmn-issues-caret').forEach(function(caret) {
       caret.addEventListener('click', function(e) {
         e.stopPropagation();
         const li = this.closest('li');
