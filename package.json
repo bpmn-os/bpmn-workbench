@@ -1,6 +1,6 @@
 {
   "name": "bpmn-workbench",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "An educational BPMN modelling + simulation workbench, and the home of the essential model-checking rules and the issues panel",
   "main": "src/app.js",
   "exports": {
