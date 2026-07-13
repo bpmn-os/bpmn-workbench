@@ -7,7 +7,9 @@
     "./rules": "./src/modules/rules/index.js",
     "./rules/*": "./src/modules/rules/*",
     "./issues": "./src/modules/issues/index.js",
-    "./issues/*": "./src/modules/issues/*"
+    "./issues/*": "./src/modules/issues/*",
+    "./toolbar": "./src/modules/toolbar/index.js",
+    "./toolbar/*": "./src/modules/toolbar/*"
   },
   "scripts": {
     "start": "run-s bundle dev",
@@ -32,9 +34,9 @@
   "license": "MIT",
   "dependencies": {
     "bpmn-js": "^18.19.0",
-    "bpmn-js-animation": "github:bpmn-os/bpmn-js-animation#aca67731c404750692594e397a0d59bba12050e1",
+    "bpmn-js-animation": "github:bpmn-os/bpmn-js-animation#c4567f4b53025c39a4821ae715f4859f325ce4ea",
     "bpmn-js-bpmnlint": "^0.24.0",
-    "bpmn-js-side-panel": "github:bpmn-os/bpmn-js-side-panel#0f7cf244b680656f1e92dbad195b3bff361c2fed",
+    "bpmn-js-side-panel": "github:bpmn-os/bpmn-js-side-panel#b97fb21acbe60d19b2beb7bb7d8e8fc35be854c3",
     "bpmnlint": "^10.3.0",
     "bpmnlint-utils": "^1.1.1",
     "diagram-js": "^15.18.0",
