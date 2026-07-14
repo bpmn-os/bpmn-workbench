@@ -1,6 +1,4 @@
-const {
-  is
-} = require('bpmnlint-utils');
+import { is } from 'bpmnlint-utils';
 
 /**
  * A rule that checks whether a gateway neither merges nor splits the flow.
@@ -8,7 +6,7 @@ const {
  * A gateway is meaningful only if it has multiple incoming (a merge) or multiple outgoing (a split)
  * sequence flows. With at most one on each side it does nothing, so it is superfluous.
  */
-module.exports = function() {
+export default function() {
 
   function check(node, reporter) {
 

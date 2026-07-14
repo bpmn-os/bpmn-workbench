@@ -1,9 +1,6 @@
-const {
-  is,
-  isAny
-} = require('bpmnlint-utils');
+import { is, isAny } from 'bpmnlint-utils';
 
-module.exports = function () {
+export default function () {
   function check(node, reporter) {
     if ( is(node,'bpmn:StartEvent')  && is(node.$parent,'bpmn:AdHocSubProcess') ) {
       reporter.report(node.id, 'Illegal start event in ad-hoc sub-process', { subtype: 'start-event' });

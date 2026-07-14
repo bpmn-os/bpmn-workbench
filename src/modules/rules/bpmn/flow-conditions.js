@@ -1,6 +1,4 @@
-const {
-  is
-} = require('bpmnlint-utils');
+import { is } from 'bpmnlint-utils';
 
 /**
  * Flags every conditional (diamond) or default (dash) flow out of a non-gateway — these form an implicit
@@ -8,7 +6,7 @@ const {
  * consistent. Each is reported with a subtype ("conditional" / "default"). Conditional/default flows out
  * of a gateway are normal and not flagged; the inconsistent (mixed) case is an error via inconsistent-flows.
  */
-module.exports = function() {
+export default function() {
 
   function check(node, reporter) {
 

@@ -1,6 +1,4 @@
-const {
-  is
-} = require('bpmnlint-utils');
+import { is } from 'bpmnlint-utils';
 
 
 /**
@@ -9,7 +7,7 @@ const {
  * Users should model the parallel splitting gateway
  * explicitly instead.
  */
-module.exports = function() {
+export default function() {
 
   function check(node, reporter) {
 

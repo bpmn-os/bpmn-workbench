@@ -1,3 +1,12 @@
+import 'bpmn-js/dist/assets/diagram-js.css';
+import 'bpmn-js/dist/assets/bpmn-js.css';
+import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
+import 'bpmn-js-bpmnlint/dist/assets/css/bpmn-js-bpmnlint.css';
+import 'bpmn-js-side-panel/assets/side-panel.css';
+import 'bpmn-js-animation/assets/animation.css';
+import 'bpmn-js-animation/assets/token-panel.css';
+import './app.less';
+
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 
 import LintModule from 'bpmn-js-bpmnlint';
@@ -18,7 +27,7 @@ import {
 import createModeButtons, { modeIcon } from './mode-buttons';
 import createToolbar from './modules/toolbar'; // on-canvas file/view toolbar (open/save/export/zoom)
 
-import newDiagram from './newDiagram.bpmn';
+import newDiagram from './newDiagram.bpmn?raw';
 
 var modeler = new BpmnModeler({
   container: '#canvas',

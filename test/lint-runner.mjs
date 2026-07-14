@@ -1,13 +1,10 @@
 // Minimal lint runner for tests: parses a BPMN file with bpmn-moddle and runs selected
 // lint rules against the moddle tree, collecting their reports.
 //
-// We drive the rule modules directly (rather than going through src/modules/rules/index.js,
-// which uses webpack-style extensionless imports that Node's ESM loader can't resolve). This
+// We drive the rule modules directly (rather than through src/modules/rules/index.js). This
 // still exercises the real rule logic — the part we care about for regressions.
 import { readFileSync } from 'fs';
-import { createRequire } from 'module';
 
-const require = createRequire(import.meta.url);
 const mod = await import('bpmn-moddle');
 const BpmnModdle = mod.default || mod.BpmnModdle;
 
@@ -46,7 +43,8 @@ export async function lint(xmlPath, ruleIds) {
   for (const ruleId of ruleIds) {
     const path = RULES[ruleId];
     if (!path) throw new Error(`unknown rule '${ruleId}'`);
-    const rule = require(path)();   // each rule module is a factory returning { check }
+    const ruleModule = await import(new URL(path, import.meta.url));
+    const rule = (ruleModule.default || ruleModule)();   // each rule module is a factory returning { check }
     const reporter = {
       report: (id, message, opts) =>
         reports.push({ rule: ruleId, id, message, subtype: opts && opts.subtype })

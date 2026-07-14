@@ -1,12 +1,10 @@
-const {
-  is
-} = require('bpmnlint-utils');
+import { is } from 'bpmnlint-utils';
 
 // Warns on any cycle in the sequence flow: BPMN-OS prefers loop activities over cyclic
 // control flow. Detected per flow-elements container (process / subprocess) via a DFS that
 // flags back edges (a sequence flow returning to a node still on the current DFS stack).
 // This subsumes the former self-loop "loop" rule (a self-loop is just a length-1 cycle).
-module.exports = function () {
+export default function () {
   function check(node, reporter) {
     if (!is(node, 'bpmn:FlowElementsContainer')) {
       return;

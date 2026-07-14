@@ -1,8 +1,6 @@
-const {
-  is
-} = require('bpmnlint-utils');
+import { is } from 'bpmnlint-utils';
 
-module.exports = function () {
+export default function () {
   function check(node, reporter) {
     // End events legitimately have no outflow; everything else (including start events
     // without an outgoing flow) is an implicit end.

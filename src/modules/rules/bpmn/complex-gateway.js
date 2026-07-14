@@ -1,13 +1,11 @@
-const {
-  is
-} = require('bpmnlint-utils');
+import { is } from 'bpmnlint-utils';
 
 /**
  * Flags every complex gateway. Its activation depends on an expression rather than its structure, so its
  * behaviour cannot be determined by inspection and the structural-anomaly rule deliberately ignores blocks
  * that contain one. Prefer an exclusive, parallel, or inclusive gateway.
  */
-module.exports = function() {
+export default function() {
 
   function check(node, reporter) {
     if (is(node, 'bpmn:ComplexGateway')) {

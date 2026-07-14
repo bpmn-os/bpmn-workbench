@@ -1,7 +1,4 @@
-const {
-  is,
-  isAny
-} = require('bpmnlint-utils');
+import { is, isAny } from 'bpmnlint-utils';
 
 /************************************************/
 /* A rule that detects unreachable nodes,       */
@@ -27,7 +24,7 @@ The above blocks are repeatedly identified in the order given above until no fur
 Thereafter, end and start nodes are removed and all remaining nodes are reported as anomaly. 
 */
 
-module.exports = function () {
+export default function () {
 
   let DEBUG = false;
   if (typeof window !== 'undefined') {

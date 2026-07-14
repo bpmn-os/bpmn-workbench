@@ -1,6 +1,4 @@
-const {
-  is
-} = require('bpmnlint-utils');
+import { is } from 'bpmnlint-utils';
 
 /**
  * An embedded sub-process is triggered by the token arriving from its parent. It has at most one blank
@@ -8,7 +6,7 @@ const {
  *
  * Event sub-processes and ad-hoc sub-processes have their own rules and are skipped here.
  */
-module.exports = function() {
+export default function() {
 
   function check(node, reporter) {
 

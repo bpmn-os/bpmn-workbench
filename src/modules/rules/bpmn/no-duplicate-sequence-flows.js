@@ -1,7 +1,4 @@
-const {
-  is,
-  isAny
-} = require('bpmnlint-utils');
+import { is, isAny } from 'bpmnlint-utils';
 
 /**
  * Two or more sequence flows between the same source and target are always wrong. The effect depends on
@@ -12,7 +9,7 @@ const {
  *   source sends two →  race                     redundant
  *   source sends one  → redundant                deadlock
  */
-module.exports = function() {
+export default function() {
 
   const MESSAGES = {
     race: 'Duplicate flows cause a race',

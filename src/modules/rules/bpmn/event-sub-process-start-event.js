@@ -1,13 +1,11 @@
-const {
-  is
-} = require('bpmnlint-utils');
+import { is } from 'bpmnlint-utils';
 
 /**
  * An event sub-process must have exactly one start event (BPMN 2.0.2, Start Events for Event
  * Sub-Processes, p. 241). The requirement that the start event be typed (not None) is covered by the
  * no-blank-event rule, so it is not duplicated here.
  */
-module.exports = function() {
+export default function() {
 
   function check(node, reporter) {
 

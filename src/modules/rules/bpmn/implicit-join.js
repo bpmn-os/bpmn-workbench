@@ -1,6 +1,4 @@
-const {
-  is
-} = require('bpmnlint-utils');
+import { is } from 'bpmnlint-utils';
 
 /**
  * A rule that checks that no implicit join is modeled by attempting
@@ -9,7 +7,7 @@ const {
  * Users should model a parallel joining gateway
  * to achieve the desired behavior.
  */
-module.exports = function() {
+export default function() {
 
   function check(node, reporter) {
 

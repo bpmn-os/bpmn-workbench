@@ -1,8 +1,6 @@
-const {
-  is
-} = require('bpmnlint-utils');
+import { is } from 'bpmnlint-utils';
 
-module.exports = function () {
+export default function () {
   function check(flow, reporter) {
     if ( is(flow,'bpmn:SequenceFlow') && flow.sourceRef.id == flow.targetRef.id ) {
       reporter.report(flow.id, 'Loop');

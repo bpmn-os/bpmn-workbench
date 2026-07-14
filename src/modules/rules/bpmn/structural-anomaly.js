@@ -1,7 +1,4 @@
-const {
-  is,
-  isAny
-} = require('bpmnlint-utils');
+import { is, isAny } from 'bpmnlint-utils';
 
 /************************************************/
 /* Detects asymmetric gateways, deadlocks,      */
@@ -40,7 +37,7 @@ When no further reduction applies, start/end nodes are removed and any remaining
 reported as a structural anomaly.
 */
 
-module.exports = function () {
+export default function () {
 
   let DEBUG = false;
   if (typeof window !== 'undefined') {

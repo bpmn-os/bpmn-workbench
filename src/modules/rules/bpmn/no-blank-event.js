@@ -1,7 +1,4 @@
-const {
-  is,
-  isAny
-} = require('bpmnlint-utils');
+import { is, isAny } from 'bpmnlint-utils';
 
 
 /**
@@ -10,7 +7,7 @@ const {
  *  - boundary: an untyped boundary event catches nothing;
  *  - event-sub-process start: must be triggered by a typed start event.
  */
-module.exports = function() {
+export default function() {
 
   function check(node, reporter) {
     const blank = !node.eventDefinitions || !node.eventDefinitions.length;
