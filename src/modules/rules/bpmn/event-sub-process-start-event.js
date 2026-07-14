@@ -17,7 +17,9 @@ export default function() {
       return is(flowElement, 'bpmn:StartEvent');
     });
 
-    if (startEvents.length > 1) {
+    if (startEvents.length === 0) {
+      reporter.report(node.id, 'Missing start event in event sub-process');
+    } else if (startEvents.length > 1) {
       startEvents.forEach(function(startEvent) {
         reporter.report(startEvent.id, 'Multiple start events in event sub-process');
       });
