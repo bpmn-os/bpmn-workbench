@@ -91,3 +91,12 @@ function toId(pkg, ruleName) {
   const name = pkg.slice(i + marker.length);
   return scope + name + '/' + ruleName;
 }
+
+// Build a rule-source context — the shape createRules consumes — from an explicit module map. This
+// replaces webpack's require.context so rules load under any bundler (webpack, Vite, Rollup, Node).
+// `modules` maps a locator relative to the context root ('./bpmn/cycle.js') to the imported rule module.
+export function createContext(modules) {
+  const context = key => modules[key];
+  context.keys = () => Object.keys(modules);
+  return context;
+}
