@@ -1,5 +1,7 @@
 import './issues.css';
 
+import { createCollapsibleEntry } from 'bpmn-js-side-panel';
+
 export default function(modeler, parent, options = {}) {
   const linting = modeler.get('linting');
   const eventBus = modeler.get('eventBus');
@@ -134,10 +136,20 @@ export default function(modeler, parent, options = {}) {
       markCanvas({});
       return;
     }
-    let html = '';
+    issueList.replaceChildren();
     let errors = 0, warnings = 0, infos = 0;
     for (const id of ids) {
-      html += '<div class="bjsl-issues" data-id="' + id + '"><div class="bjsl-current-element-issues"><div class="bpmn-issues-id">' + displayId(id) + '</div><ul>';
+      // one group per element: bold id header + a list of collapsible issue entries
+      const group = document.createElement('div');
+      group.className = 'bjsl-issues';
+      group.setAttribute('data-id', id);
+      const inner = document.createElement('div');
+      inner.className = 'bjsl-current-element-issues';
+      const idEl = document.createElement('div');
+      idEl.className = 'bpmn-issues-id';
+      idEl.textContent = displayId(id);
+      inner.appendChild(idEl);
+
       for (let i = 0; i < event.issues[id].length; i++) {
         const issue = event.issues[id][i];
         if (issue.category === 'error') { errors++; }
@@ -145,52 +157,51 @@ export default function(modeler, parent, options = {}) {
         else { warnings++; }
         // a rule may tag a finding with a `subtype` (report(id, msg, { subtype })) for a more specific
         // rationale; fall back to the rule-level entry. Each entry is { description, reference, url }.
-        const entry = (issue.subtype && descriptions[issue.rule + '/' + issue.subtype])
+        const desc = (issue.subtype && descriptions[issue.rule + '/' + issue.subtype])
           || descriptions[issue.rule] || {};
-        const why = entry.description;
-        const ref = entry.reference;
+        const why = desc.description;
+        const ref = desc.reference;
         const detail = why || ref;
-        html += '<li class="' + issue.category + '">'
-          + '<span class="bpmn-issues-body">'
-          + '<span class="bpmn-issues-head">' + (issue.category == 'error' ? error : (issue.category == 'info' ? info : warning))
-          + '<span class="bpmn-issues-msg">' + translate(issue.message) + '</span>'
-          + (detail ? '<span class="bpmn-issues-caret" title="Why is this flagged?">'
-            + '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M10,12 L3,12 C2.44771525,12 2,11.5522847 2,11 C2,10.4477153 2.44771525,10 3,10 L8,10 L8,5 C8,4.44771525 8.44771525,4 9,4 C9.55228475,4 10,4.44771525 10,5 L10,12 Z" transform="rotate(-45 6 8)"></path></svg>'
-            + '</span>' : '')
-          + '</span>'
-          + (detail ? '<div class="bpmn-issues-why">'
-            + (why || '')
-            + (ref ? '<div class="bpmn-issues-ref">' + (entry.url
-                ? '<a href="' + entry.url + '" target="_blank" rel="noopener">' + ref + '</a>'
-                : ref) + '</div>' : '')
-            + '</div>' : '')
-          + '</span></li>';
-      }
-      html += '</ul></div></div>';
-    }
-    issueList.innerHTML = html;
-    setBadge(errors, warnings, infos);
-    markCanvas(event.issues);
-    // caret toggles each issue's "why" rationale; stop the click so it doesn't also select the element
-    issueList.querySelectorAll('.bpmn-issues-caret').forEach(function(caret) {
-      caret.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const li = this.closest('li');
-        if (li) {
-          li.classList.toggle('expanded');
+
+        // Render each issue with bpmn-js-side-panel's reusable collapsible entry (not bespoke markup):
+        // the summary is the severity icon + message; the rationale (when present) is the expandable
+        // body, so an issue with no rationale is a plain, non-expandable row.
+        const summary = document.createElement('span');
+        summary.className = 'bpmn-issues-head';
+        summary.innerHTML = (issue.category === 'error' ? error : issue.category === 'info' ? info : warning)
+          + '<span class="bpmn-issues-msg">' + translate(issue.message) + '</span>';
+
+        const entry = createCollapsibleEntry({ label: summary, expandable: !!detail });
+        entry.summaryEl.style.whiteSpace = 'normal';   // let the message wrap (titles default to nowrap)
+        entry.summaryEl.style.overflow = 'visible';
+
+        if (detail) {
+          const whyEl = document.createElement('div');
+          whyEl.className = 'bpmn-issues-why';
+          whyEl.style.display = 'block';   // visibility now comes from the entry's open state, not li.expanded
+          whyEl.innerHTML = (why || '')
+            + (ref ? '<div class="bpmn-issues-ref">' + (desc.url
+                ? '<a href="' + desc.url + '" target="_blank" rel="noopener">' + ref + '</a>'
+                : ref) + '</div>' : '');
+          entry.contentEl.appendChild(whyEl);
         }
-      });
-    });
-    for (let i = 0; i < issueList.children.length; i++) {
-      issueList.children[i].addEventListener("click", function() {
-        const element = elementRegistry.get(this.getAttribute("data-id"));
+        inner.appendChild(entry.element);
+      }
+
+      group.appendChild(inner);
+      // clicking the group selects its element on the canvas (expanding an entry bubbles here too)
+      group.addEventListener('click', function() {
+        const element = elementRegistry.get(id);
         canvas.setRootElement(canvas.findRoot(element));
         selectionService.select(element);
-        if (element.type == 'bpmn:Process') {
+        if (element.type === 'bpmn:Process') {
           contextPad.close(element);
         }
       });
+      issueList.appendChild(group);
     }
+    setBadge(errors, warnings, infos);
+    markCanvas(event.issues);
   });
 
   // Enable the model checker by default so issues are shown without toggling.

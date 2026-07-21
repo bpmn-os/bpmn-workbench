@@ -86,8 +86,11 @@
 }
 
 /* the issue list: one group per element, separated by a single bottom rule */
+/* Vertical rhythm + divider between element-groups only. The horizontal layout of the entries (left
+   inset and the caret's gap from the right edge) is the side panel's job — never set container padding
+   here, or the caret drifts between tabs. */
 #issueList .bjsl-issues {
-  padding: 8px 12px;
+  padding: 8px 0;
   border: none;
   border-bottom: 1px solid var(--bjs-grey-90, hsl(225, 10%, 90%));
 }
@@ -100,6 +103,8 @@
 .bpmn-issues-id {
   font-weight: 600;
   color: var(--bjs-grey-15, hsl(225, 10%, 15%));
+  /* align the id label to the entries' inset, which the side panel owns (shared token) */
+  padding-left: var(--bjs-collapsible-entry-inset, 12px);
 }
 
 #issueList ul {
