@@ -25,7 +25,7 @@ IssuesPanel.prototype._init = function() {
     return; // no side panel → the Issues tab is not shown
   }
 
-  const pane = sidePanel.addTab({
+  const { body } = sidePanel.addTab({
     id: 'issues',
     label: this._config.label || 'Issues',
     priority: this._config.priority != null ? this._config.priority : 10
@@ -44,7 +44,7 @@ IssuesPanel.prototype._init = function() {
   // viewer) resolves to null instead of throwing at init.
   createIssues(
     { get: (name) => this._injector.get(name, false) },
-    pane,
+    body,
     { descriptions }
   );
 };

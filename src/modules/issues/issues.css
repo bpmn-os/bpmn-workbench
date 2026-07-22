@@ -104,7 +104,7 @@
   font-weight: 600;
   color: var(--bjs-grey-15, hsl(225, 10%, 15%));
   /* align the id label to the entries' inset, which the side panel owns (shared token) */
-  padding-left: var(--bjs-collapsible-entry-inset, 12px);
+  padding-left: var(--bjs-entry-inset, 12px);
 }
 
 #issueList ul {
