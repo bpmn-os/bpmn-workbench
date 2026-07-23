@@ -107,6 +107,22 @@
   padding-left: var(--bjs-entry-inset, 12px);
 }
 
+/* The issue list and each group's issues are bpmn-js-side-panel ListEntrys (keyed reconcile, so a
+   re-lint preserves expanded rationales and scroll). Neutralise the list's default 5px inter-item
+   margin: element-groups are divided by the .bjsl-issues border, and issues within a group stack
+   flush under the id header (which keeps a small gap of its own). */
+#issueList.bjs-list > * + * {
+  margin-top: 0;
+}
+
+#issueList .bjsl-current-element-issues > .bjs-list {
+  margin-top: 4px;
+}
+
+#issueList .bjsl-current-element-issues > .bjs-list > * + * {
+  margin-top: 0;
+}
+
 #issueList ul {
   margin: 4px 0 0;
   padding-left: 0;
