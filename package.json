@@ -33,24 +33,24 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@xmldom/xmldom": "^0.9.8",
     "bpmn-js": "^18.19.0",
     "bpmn-js-animation": "github:bpmn-os/bpmn-js-animation#84d702f348dcb83d5aa01e2676b3885a4cf5f657",
     "bpmn-js-bpmnlint": "^0.24.0",
     "bpmn-js-side-panel": "github:bpmn-os/bpmn-js-side-panel#930cf757ae3088ba4f70f28e06c6fdf0e1de9a96",
     "bpmnlint": "^10.3.0",
     "bpmnlint-utils": "^1.1.1",
-    "chrome-launcher": "^1.2.1",
     "diagram-js": "^15.18.0",
     "inherits": "^2.0.4",
     "min-dom": "^5.0.0",
-    "puppeteer-core": "^24.4.0",
     "tiny-svg": "^4.1.4"
   },
   "devDependencies": {
+    "@xmldom/xmldom": "^0.9.8",
     "bpmn-auto-layout": "^1.3.0",
     "bpmn-moddle": "^10.0.0",
+    "chrome-launcher": "^1.2.1",
     "less": "^4.6.7",
+    "puppeteer-core": "^24.4.0",
     "vite": "^5.4.0"
   },
   "engines": {
