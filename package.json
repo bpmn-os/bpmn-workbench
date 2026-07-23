@@ -10,7 +10,11 @@
     "./issues": "./src/modules/issues/index.js",
     "./issues/*": "./src/modules/issues/*",
     "./toolbar": "./src/modules/toolbar/index.js",
-    "./toolbar/*": "./src/modules/toolbar/*"
+    "./toolbar/*": "./src/modules/toolbar/*",
+    "./bpmn2svg": "./bpmn2svg.js"
+  },
+  "bin": {
+    "bpmn2svg": "./bpmn2svg.js"
   },
   "scripts": {
     "dev": "vite",
@@ -29,15 +33,18 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@xmldom/xmldom": "^0.9.8",
     "bpmn-js": "^18.19.0",
-    "bpmn-js-animation": "github:bpmn-os/bpmn-js-animation#ff0202e98b73274fca4367c472af0d23a1f4dd92",
+    "bpmn-js-animation": "github:bpmn-os/bpmn-js-animation#84d702f348dcb83d5aa01e2676b3885a4cf5f657",
     "bpmn-js-bpmnlint": "^0.24.0",
     "bpmn-js-side-panel": "github:bpmn-os/bpmn-js-side-panel#930cf757ae3088ba4f70f28e06c6fdf0e1de9a96",
     "bpmnlint": "^10.3.0",
     "bpmnlint-utils": "^1.1.1",
+    "chrome-launcher": "^1.2.1",
     "diagram-js": "^15.18.0",
     "inherits": "^2.0.4",
     "min-dom": "^5.0.0",
+    "puppeteer-core": "^24.4.0",
     "tiny-svg": "^4.1.4"
   },
   "devDependencies": {

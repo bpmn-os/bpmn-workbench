@@ -62,6 +62,10 @@ var modeler = new BpmnModeler({
   ]
 });
 
+// Expose the modeler globally so the headless bpmn2svg CLI (bpmn2svg.js) can drive it — it navigates
+// a browser to this app and calls modeler.importXML / modeler.saveSVG in the page context.
+window.modeler = modeler;
+
 modeler.importXML(newDiagram);
 
 // the on-canvas Simulation / Playback buttons (Model = neither active)

@@ -17,7 +17,7 @@ panel are provided by [bpmn-js-animation](https://github.com/bpmn-os/bpmn-js-ani
 
 ## Provided modules
 
-In addition to the application, this repository provides three reusable modules:
+In addition to the application, this repository provides four reusable modules:
 
 - `bpmn-workbench/rules` — the essential model-checking rules and the bpmnlint configuration composer
   (see [Rules](#rules) below).
@@ -27,6 +27,9 @@ In addition to the application, this repository provides three reusable modules:
   centre, zoom) with inline SVG icons and its own CSS. `import createToolbar from
   'bpmn-workbench/toolbar'; createToolbar(modeler);` — no HTML, CSS link, or icon font required (the
   module needs a CSS loader in the host bundler, as it imports its stylesheet).
+- `bpmn-workbench/bpmn2svg` — a headless BPMN→SVG renderer, available both as a `bpmn2svg` command and
+  as a reusable module (`renderBpmnToSvg`, `withDevServer`, `runCli`) for building app-specific
+  variants. See [Rendering diagrams to SVG](#rendering-diagrams-to-svg-bpmn2svg) below.
 
 ## Rules
 
@@ -73,13 +76,48 @@ file it matches), so: reuse another package's rules through the **context that p
 you actually use (this is why the essential set copies its single `bpmnlint` rule locally rather than
 pulling in all of `bpmnlint/rules`).
 
+## Rendering diagrams to SVG (`bpmn2svg`)
+
+`bpmn2svg` renders a `.bpmn` file to SVG headlessly. It drives a running app's modeller (exposed as a
+global `window.modeler`), emitting one SVG per plane — each collapsed sub-process gets its own file —
+and adding `data-element-id` tooltips. As a `bin` it drives **this** app (plain BPMN); its render core
+is also exported, so a downstream app can drive its own modeller — reusing this exact logic to render
+its own extensions.
+
+### Prerequisites
+
+- Google Chrome — auto-detected via `chrome-launcher` (`sudo apt install google-chrome-stable`).
+
+### Install
+
+The `bpmn2svg` bin lives in this repo and depends on it, so put it on your `PATH` with `npm link`:
+
+```sh
+npm install
+npm link          # adds `bpmn2svg` to your PATH
+```
+
+No `sudo` is needed as long as npm's global prefix is user-writable. If it isn't, point npm at a
+user-owned prefix once and make sure its `bin` is on your `PATH` (`npm config set prefix ~/.local`).
+
+### Usage
+
+```sh
+# Auto-start: spins up this app's dev server, renders, then shuts it down.
+bpmn2svg <file.bpmn> [-o <outputDir>]
+
+# Against an already-running server that exposes window.modeler.
+bpmn2svg -s <serverURL> <file.bpmn> [-o <outputDir>]
+```
+
 ## Development
 
 ```sh
 npm install
-npm start        # build, then watch (webpack + lessc) and serve dist/
-npm run bundle   # one-off production build → dist/
-npm test         # run the lint-rule regression tests (see test/README.md)
+npm run dev       # Vite dev server (hot reload)
+npm run build     # production build to dist/
+npm run preview   # serve the production build
+npm test          # run the lint-rule regression tests (see test/README.md)
 ```
 
 ## License
