@@ -172,6 +172,15 @@ export async function runCli({ appDir, argv, toolName = 'bpmn2svg' }) {
   console.log(`Saved ${count} diagram(s) to: ${outDir}`);
 }
 
+// Margin around the diagram, in diagram units. A stroke is centred on the geometry it outlines, so half of
+// it falls outside the bounding box bpmn-js writes as the viewBox and the outermost elements come out
+// clipped; the rest is breathing room against whatever the SVG is embedded in.
+const PADDING = 5;
+
+/**
+ * Post-process a rendered SVG: `data-element-id` tooltips, and a viewBox grown by `PADDING` on every side
+ * so nothing sits flush with the edge. `width`/`height` grow with it, keeping the diagram at 1:1 scale.
+ */
 function addTooltips(svgContent) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(svgContent, 'image/svg+xml');
@@ -184,7 +193,25 @@ function addTooltips(svgContent) {
       element.appendChild(title);
     }
   }
+  padViewBox(doc.documentElement);
   return new XMLSerializer().serializeToString(doc);
+}
+
+function padViewBox(svg) {
+  const viewBox = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+
+  // an unreadable viewBox is left as it is: a diagram flush with its edge beats one that has moved
+  if (viewBox.length !== 4 || viewBox.some(isNaN)) {
+    return;
+  }
+
+  const [ x, y, width, height ] = viewBox,
+        paddedWidth = width + 2 * PADDING,
+        paddedHeight = height + 2 * PADDING;
+
+  svg.setAttribute('viewBox', [ x - PADDING, y - PADDING, paddedWidth, paddedHeight ].join(' '));
+  svg.setAttribute('width', String(paddedWidth));
+  svg.setAttribute('height', String(paddedHeight));
 }
 
 // Run as a bin: drive THIS package's app (bpmn-workbench → plain BPMN).
