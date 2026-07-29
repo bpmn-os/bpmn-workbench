@@ -36,7 +36,7 @@
     "bpmn-js": "^18.19.0",
     "bpmn-js-animation": "github:bpmn-os/bpmn-js-animation#8b8d635912d2f09c77e75baf8603cf056d305f92",
     "bpmn-js-bpmnlint": "^0.24.0",
-    "bpmn-js-side-panel": "github:bpmn-os/bpmn-js-side-panel#b4c9b05fa7a51f1ffed67fb8900fb865dbc04be4",
+    "bpmn-js-side-panel": "github:bpmn-os/bpmn-js-side-panel#d037036f451a1d722915405a50072e4d34c7599f",
     "bpmnlint": "^10.3.0",
     "bpmnlint-utils": "^1.1.1",
     "diagram-js": "^15.18.0",
