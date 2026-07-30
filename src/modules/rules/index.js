@@ -5,8 +5,10 @@
 // rules.json, adjust severities, drop/add entries, and pass it (with its own source registry) to
 // `createRules` — no rule .js is copied.
 
-import { createRules, createContext } from "./create-rules";
-import rules from "./rules.json";
+import { createRules, createContext } from "./create-rules.js";
+// the import attribute is what Node requires of a JSON module, and every bundler in use accepts it, so the
+// rule set is loadable outside a bundle — which is what makes a rule testable and a corpus checkable
+import rules from "./rules.json" with { type: 'json' };
 
 export { createRules, createContext, rules };
 

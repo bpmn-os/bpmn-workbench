@@ -1,4 +1,4 @@
-import createIssues from './create-issues';
+import createIssues from './create-issues.js';
 
 /**
  * IssuesPanel — a self-registering "Issues" side-panel tab, the counterpart to bpmn-js-animation's

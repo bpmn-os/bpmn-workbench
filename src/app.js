@@ -10,8 +10,8 @@ import './app.less';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 
 import LintModule from 'bpmn-js-bpmnlint';
-import getRules from './modules/rules'; // essential lint rules (the bundle carries their rationales)
-import IssuesPanelModule from './modules/issues'; // self-registering "Issues" side-panel tab
+import getRules from './modules/rules/index.js'; // essential lint rules (the bundle carries their rationales)
+import IssuesPanelModule from './modules/issues/index.js'; // self-registering "Issues" side-panel tab
 
 import SidePanelModule from 'bpmn-js-side-panel';
 
@@ -24,8 +24,8 @@ import {
   ModeModule
 } from 'bpmn-js-animation';
 
-import createModeButtons, { modeIcon } from './mode-buttons';
-import createToolbar from './modules/toolbar'; // on-canvas file/view toolbar (open/save/export/zoom)
+import createModeButtons, { modeIcon } from './mode-buttons.js';
+import createToolbar from './modules/toolbar/index.js'; // on-canvas file/view toolbar (open/save/export/zoom)
 
 import newDiagram from './newDiagram.bpmn?raw';
 

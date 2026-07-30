@@ -1,5 +1,5 @@
-import IssuesPanel from './IssuesPanel';
-import createIssues from './create-issues';
+import IssuesPanel from './IssuesPanel.js';
+import createIssues from './create-issues.js';
 
 /**
  * Opt-in **Issues panel** — adds a self-registering "Issues" tab to a `bpmn-js-side-panel` (if present;
