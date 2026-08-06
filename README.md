@@ -22,7 +22,13 @@ In addition to the application, this repository provides four reusable modules:
 - `bpmn-workbench/rules` — the essential model-checking rules and the bpmnlint configuration composer
   (see [Rules](#rules) below).
 - `bpmn-workbench/issues` — a self-registering Issues side-panel tab that presents the results of the
-  model checker.
+  model checker. Its header names the three severities, and a click on one decides whether that severity
+  is looked for at all: what is switched off has its rules switched off, so it is absent from the canvas
+  overlays, from the list, from the canvas outline and from the tab badge together, and its count is not
+  shown, there being nothing counted. With none of them on, nothing is linted. The derivation is
+  `bpmn-workbench/issues/severities.js`, which reads a rule's severity in each of the forms bpmnlint
+  accepts and returns a configuration for `Linting#setLinterConfig` without touching the one it was
+  given.
 - `bpmn-workbench/toolbar` — a self-contained on-canvas file/view toolbar (open, save, export SVG,
   centre, zoom) with inline SVG icons and its own CSS. `import createToolbar from
   'bpmn-workbench/toolbar'; createToolbar(modeler);` — no HTML, CSS link, or icon font required (the

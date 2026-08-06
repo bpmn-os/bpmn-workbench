@@ -2,6 +2,8 @@ import './issues.css';
 
 import { createListEntry, createCollapsibleEntry } from 'bpmn-js-side-panel';
 
+import { SEVERITIES, withSeverities } from './severities.js';
+
 export default function(modeler, parent, options = {}) {
   const linting = modeler.get('linting');
   const eventBus = modeler.get('eventBus');
@@ -54,20 +56,12 @@ export default function(modeler, parent, options = {}) {
     }
   }
 
-  // markup: the "Show issues" header, then the issue list. The list is a bpmn-js-side-panel ListEntry
+  // markup: a line per severity, then the issue list. The list is a bpmn-js-side-panel ListEntry
   // (keyed, reconciled in place) rather than a div rebuilt each lint pass — linting re-runs on every
   // model edit, so a wholesale rebuild would collapse any expanded rationale and reset scroll; keyed
   // reconcile keeps both. The element keeps id "issueList" the stylesheet targets.
   const wrap = document.createElement('div');
   wrap.className = 'bpmn-issues';
-  wrap.innerHTML =
-    `<label class="bpmn-issues-header">
-       <span class="bpmn-issues-toggle">
-         <input id="lintingToggle" type="checkbox" checked>
-         <span class="bpmn-issues-toggle-slider"></span>
-       </span>
-       <span>Show issues</span>
-     </label>`;
 
   const issueList = createListEntry();   // keyed by element id — one group per element
   issueList.element.id = 'issueList';
@@ -81,17 +75,16 @@ export default function(modeler, parent, options = {}) {
 
   parent.appendChild(wrap);
 
-  const toggle = wrap.querySelector('input');
-  toggle.addEventListener('change', function(event) {
-    linting.toggle(event.target.checked);
-  });
-
-  eventBus.on('linting.toggle', function(event) {
-    const lintingToggle = document.getElementById('lintingToggle');
-    if (lintingToggle) {
-      lintingToggle.checked = event.active;
-    }
-  });
+  // Which severities are looked for. A severity that is not shown has its rules switched off, so the
+  // linter reports nothing of it: it is gone from the canvas, from this list, from the canvas outline and
+  // from the tab badge together. With none shown nothing is linted at all, which is what the switch this
+  // replaces used to say.
+  //
+  // The configuration the host gave is the baseline and is never written to, since a rule switched off no
+  // longer states the severity it had. It is read from the host's own `linting.bpmnlint`, which is what a
+  // host passes to the modeller, and from the linter itself where a host configured it another way.
+  const baseline = (modeler.get('config.linting', false) || {}).bpmnlint || linting.getLinterConfig();
+  const shown = new Set(SEVERITIES);
 
   // panel severity icons mirror the canvas markers: a colored circle (currentColor, set per severity via
   // CSS) with a white glyph — error ✗, warning !, info i.
@@ -100,6 +93,64 @@ export default function(modeler, parent, options = {}) {
   const warning = '<span class="icon warning"> <svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="margin: auto;text-align: center;"><circle cx="8" cy="8" r="8" fill="currentColor"></circle><rect x="7.1" y="3.5" width="1.8" height="5.5" rx="0.6" fill="#fff"></rect><circle cx="8" cy="11.7" r="1.05" fill="#fff"></circle></svg></span>&nbsp;';
 
   const info = '<span class="icon info"> <svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="margin: auto;text-align: center;"><circle cx="8" cy="8" r="8" fill="currentColor"></circle><rect x="7" y="7" width="2" height="5" rx="0.5" fill="#fff"></rect><circle cx="8" cy="4.3" r="1.15" fill="#fff"></circle></svg></span>&nbsp;';
+
+  // one line per severity: its mark, its name and, while it is looked for, how many there are. A line that
+  // is off shows no count, there being nothing to count: its rules are not run.
+  const LABELS = { error: 'Errors', warn: 'Warnings', info: 'Notes' };
+  const MARKS = { error, warn: warning, info };
+  const CLASSES = { error: 'error', warn: 'warning', info: 'info' };
+
+  const severities = document.createElement('div');
+  severities.className = 'bpmn-issues-severities';
+  wrap.insertBefore(severities, issueList.element);
+
+  const lines = new Map();
+
+  SEVERITIES.forEach((severity) => {
+    const line = document.createElement('button'),
+          mark = document.createElement('span'),
+          name = document.createElement('span'),
+          count = document.createElement('span');
+
+    line.type = 'button';
+    line.className = 'bpmn-issues-severity ' + CLASSES[severity];
+    mark.className = 'bpmn-issues-mark';
+    mark.innerHTML = MARKS[severity];
+    name.className = 'bpmn-issues-name';
+    name.textContent = LABELS[severity];
+    count.className = 'bpmn-issues-count';
+
+    line.append(mark, name, count);
+    line.addEventListener('click', () => {
+      shown.has(severity) ? shown.delete(severity) : shown.add(severity);
+      line.setAttribute('aria-pressed', String(shown.has(severity)));
+      applySeverities();
+    });
+    line.setAttribute('aria-pressed', 'true');
+
+    severities.appendChild(line);
+    lines.set(severity, count);
+  });
+
+  // Ask the linter for what is shown, and forget the counts of what is not: a severity that is off is not
+  // being looked for, so the last number seen would say something no longer true.
+  function applySeverities() {
+    SEVERITIES.forEach((severity) => {
+      if (!shown.has(severity)) {
+        lines.get(severity).textContent = '';
+      }
+    });
+
+    linting.setLinterConfig(withSeverities(baseline, shown));
+  }
+
+  function setCounts(errors, warnings, infos) {
+    const held = { error: errors, warn: warnings, info: infos };
+
+    SEVERITIES.forEach((severity) => {
+      lines.get(severity).textContent = shown.has(severity) ? '(' + held[severity] + ')' : '';
+    });
+  }
 
   // a count badge on the "Issues" side-panel tab — at-a-glance feedback without opening the tab. Red
   // when any errors, amber when only warnings, blue when only info, hidden when clean (or linting off).
@@ -236,6 +287,7 @@ export default function(modeler, parent, options = {}) {
 
     emptyHint.style.display = ids.length ? 'none' : '';
     setBadge(errors, warnings, infos);
+    setCounts(errors, warnings, infos);
     markCanvas(issues);
   }
 
@@ -246,6 +298,7 @@ export default function(modeler, parent, options = {}) {
     groups.clear();
     emptyHint.style.display = 'none';
     setBadge(0, 0, 0);
+    setCounts(0, 0, 0);
     markCanvas({});
   }
 
@@ -257,7 +310,7 @@ export default function(modeler, parent, options = {}) {
 
   eventBus.on('linting.completed', function(event) {
     // linting.completed also fires while linting is toggled OFF (bpmn-js-bpmnlint re-lints on toggle);
-    // when inactive, clear everything so "Show issues" off means off.
+    // when inactive, clear everything so that off means off.
     if (!linting.isActive()) {
       clearAll();
       return;
@@ -265,6 +318,7 @@ export default function(modeler, parent, options = {}) {
     render(event.issues || {});
   });
 
-  // Enable the model checker by default so issues are shown without toggling.
+  // Enable the model checker by default so issues are shown without asking for them.
   linting.toggle(true);
+  applySeverities();
 }
