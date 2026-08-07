@@ -152,23 +152,21 @@ export default function(modeler, parent, options = {}) {
     });
   }
 
-  // a count badge on the "Issues" side-panel tab — at-a-glance feedback without opening the tab. Red
-  // when any errors, amber when only warnings, blue when only info, hidden when clean (or linting off).
-  // getTab() doesn't expose the tab <button>, so find it in the DOM by its data-tab attribute
-  const tabButton = document.querySelector('.bjs-side-panel-tab[data-tab="issues"]');
-  const badge = document.createElement('span');
-  badge.className = 'bpmn-issues-tab-badge';
-  badge.style.display = 'none';
-  if (tabButton) {
-    tabButton.appendChild(badge);
-  }
+  // How many issues a lint found, said in the tab's own name — at-a-glance feedback without opening the
+  // tab. It is the name rather than a mark beside it because the name is what both of the panel's views
+  // show, a selector in one and a column's resizer in the other, and because the panel renames a tab
+  // without this needing to know where either is drawn. The count is dropped when the model is clean.
+  const sidePanel = modeler.get('sidePanel', false);
+  const tabName = (sidePanel && sidePanel.getTab('issues') || {}).label || 'Issues';
+
   function setBadge(errors, warnings, infos) {
+    if (!sidePanel) {
+      return;
+    }
+
     const total = errors + warnings + infos;
-    badge.style.display = total ? '' : 'none';          // no "(0)" when clean
-    badge.textContent = total ? '(' + total + ')' : '';  // plain count in parentheses
-    badge.title = errors + ' error' + (errors === 1 ? '' : 's')
-      + ', ' + warnings + ' warning' + (warnings === 1 ? '' : 's')
-      + ', ' + infos + ' info';
+
+    sidePanel.setTabLabel('issues', total ? tabName + ' (' + total + ')' : tabName);
   }
 
   // --- keyed reconcile --------------------------------------------------------

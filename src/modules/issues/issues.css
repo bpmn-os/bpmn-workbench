@@ -216,12 +216,6 @@
   display: block;
 }
 
-/* plain "(k)" issue count appended to the Issues tab label (hidden when zero, set in JS) */
-.bpmn-issues-tab-badge {
-  margin-left: 4px;
-  color: var(--bjs-grey-55, hsl(225, 10%, 55%));
-}
-
 /* bpmn-js-bpmnlint's own bottom-right panel + per-issue buttons aren't used here */
 .bjsl-button, .bjsl-issues-bottom-right {
   display: none;

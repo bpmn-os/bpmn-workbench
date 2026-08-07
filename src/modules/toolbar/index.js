@@ -158,7 +158,7 @@ function downloadText(filename, text, mimeType) {
   document.body.removeChild(a);
 }
 
-// Inline, dependency-free stroke icons (Feather-style, 24x24) so the toolbar needs no icon font.
+// Feather's icons (MIT; see LICENSE), inlined so the toolbar needs no icon font and no dependency.
 const ICONS = {
   load: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
   save: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',

@@ -17,7 +17,8 @@ import './mode-buttons.css';
  * otherwise).
  */
 
-// FontAwesome free icon paths, inlined (no icon font / CDN). The ring is `circle` (regular); the inner
+// Font Awesome Free icon paths, inlined (no icon font / CDN); CC BY 4.0, attributed in LICENSE. The ring
+// is `circle` (regular); the inner
 // glyph is a solid icon composed at fa-stack proportions (glyph at half the ring, centred). `w` is
 // the glyph's native viewBox width (all FA icons are 512 tall); `dx` optically re-centres it.
 const RING = 'M464 256a208 208 0 1 0 -416 0 208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0 256 256 0 1 1 -512 0z';
