@@ -1,13 +1,9 @@
 MIT License
 
 Copyright (c) 2026 Asvin Goel
-
-Icons in `src/modules/toolbar/index.js` are from Feather
-(https://feathericons.com): Copyright (c) 2013-2017 Cole Bemis, MIT licensed.
-
-Icons in `src/mode-buttons.js` are from Font Awesome Free
-(https://fontawesome.com), licensed CC BY 4.0
-(https://creativecommons.org/licenses/by/4.0/).
+Copyright (c) 2013-2017 Cole Bemis (Feather icons)
+Copyright (c) 2026 Fonticons, Inc. (Font Awesome Free icons, CC BY 4.0,
+https://creativecommons.org/licenses/by/4.0/)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
