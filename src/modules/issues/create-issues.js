@@ -5,6 +5,8 @@ import { createListEntry, createCollapsibleEntry } from 'bpmn-js-side-panel';
 import { SEVERITIES, withSeverities } from './severities.js';
 
 export default function(modeler, parent, options = {}) {
+  // where the severities stand: the tab's band if the host hands one over, else above the list
+  const band = options.header || null;
   const linting = modeler.get('linting');
   const eventBus = modeler.get('eventBus');
   const elementRegistry = modeler.get('elementRegistry');
@@ -88,29 +90,50 @@ export default function(modeler, parent, options = {}) {
 
   // panel severity icons mirror the canvas markers: a colored circle (currentColor, set per severity via
   // CSS) with a white glyph — error ✗, warning !, info i.
-  const error = '<span class="icon error"> <svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="margin: auto;text-align: center;"><circle cx="8" cy="8" r="8" fill="currentColor"></circle><path d="M5.3 5.3L10.7 10.7M10.7 5.3L5.3 10.7" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none"></path></svg></span>&nbsp;';
+  // The glyph alone, which is what a flex row wants: a mark in the tab's band sits beside its name as a box
+  // among boxes, so it carries no wrapper, no leading space and no trailing one.
+  const GLYPHS = {
+    error: '<svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8" fill="currentColor"></circle><path d="M5.3 5.3L10.7 10.7M10.7 5.3L5.3 10.7" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none"></path></svg>',
+    warning: '<svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8" fill="currentColor"></circle><rect x="7.1" y="3.5" width="1.8" height="5.5" rx="0.6" fill="#fff"></rect><circle cx="8" cy="11.7" r="1.05" fill="#fff"></circle></svg>',
+    info: '<svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="8" fill="currentColor"></circle><rect x="7" y="7" width="2" height="5" rx="0.5" fill="#fff"></rect><circle cx="8" cy="4.3" r="1.15" fill="#fff"></circle></svg>'
+  };
 
-  const warning = '<span class="icon warning"> <svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="margin: auto;text-align: center;"><circle cx="8" cy="8" r="8" fill="currentColor"></circle><rect x="7.1" y="3.5" width="1.8" height="5.5" rx="0.6" fill="#fff"></rect><circle cx="8" cy="11.7" r="1.05" fill="#fff"></circle></svg></span>&nbsp;';
+  // The same glyph in a line of text, where it needs the wrapper that colours it and a space after it.
+  const inline = (kind) => '<span class="icon ' + kind + '">' + GLYPHS[kind] + '</span>&nbsp;';
 
-  const info = '<span class="icon info"> <svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="margin: auto;text-align: center;"><circle cx="8" cy="8" r="8" fill="currentColor"></circle><rect x="7" y="7" width="2" height="5" rx="0.5" fill="#fff"></rect><circle cx="8" cy="4.3" r="1.15" fill="#fff"></circle></svg></span>&nbsp;';
+  const error = inline('error');
 
-  // one line per severity: its mark, its name and, while it is looked for, how many there are. A line that
-  // is off shows no count, there being nothing to count: its rules are not run.
-  const LABELS = { error: 'Errors', warn: 'Warnings', info: 'Notes' };
-  const MARKS = { error, warn: warning, info };
+  const warning = inline('warning');
+
+  const info = inline('info');
+
+  // One button per severity: its mark and its name. They stand on one line in the tab's band, above the list
+  // they govern, so that they stay while it scrolls; the names are accordingly the short ones and there are
+  // no counts, how many were found being said in the tab's own name. The three read alike, and the only
+  // thing that changes a colour is whether a severity is looked for.
+  const LABELS = { error: 'errors', warn: 'warnings', info: 'notes' };
+  const MARKS = { error: GLYPHS.error, warn: GLYPHS.warning, info: GLYPHS.info };
   const CLASSES = { error: 'error', warn: 'warning', info: 'info' };
 
   const severities = document.createElement('div');
   severities.className = 'bpmn-issues-severities';
-  wrap.insertBefore(severities, issueList.element);
 
-  const lines = new Map();
+  // The band of the tab, where a control that governs the whole list belongs, so that it stays while the
+  // list scrolls under it. A host that gives none keeps the severities where they were, above the list.
+  if (band) {
+    const name = document.createElement('h1');
+
+    name.className = 'bjs-tab-name';
+    name.textContent = options.name || 'Issues';
+    band.append(name, severities);
+  } else {
+    wrap.insertBefore(severities, issueList.element);
+  }
 
   SEVERITIES.forEach((severity) => {
     const line = document.createElement('button'),
           mark = document.createElement('span'),
-          name = document.createElement('span'),
-          count = document.createElement('span');
+          name = document.createElement('span');
 
     line.type = 'button';
     line.className = 'bpmn-issues-severity ' + CLASSES[severity];
@@ -118,9 +141,8 @@ export default function(modeler, parent, options = {}) {
     mark.innerHTML = MARKS[severity];
     name.className = 'bpmn-issues-name';
     name.textContent = LABELS[severity];
-    count.className = 'bpmn-issues-count';
 
-    line.append(mark, name, count);
+    line.append(mark, name);
     line.addEventListener('click', () => {
       shown.has(severity) ? shown.delete(severity) : shown.add(severity);
       line.setAttribute('aria-pressed', String(shown.has(severity)));
@@ -129,27 +151,12 @@ export default function(modeler, parent, options = {}) {
     line.setAttribute('aria-pressed', 'true');
 
     severities.appendChild(line);
-    lines.set(severity, count);
   });
 
-  // Ask the linter for what is shown, and forget the counts of what is not: a severity that is off is not
-  // being looked for, so the last number seen would say something no longer true.
+  // The three read alike, and the only thing that changes a severity's colour is whether it is looked for:
+  // dark where it is, grey where it is not. How many of a kind were found is said in the tab's own name.
   function applySeverities() {
-    SEVERITIES.forEach((severity) => {
-      if (!shown.has(severity)) {
-        lines.get(severity).textContent = '';
-      }
-    });
-
     linting.setLinterConfig(withSeverities(baseline, shown));
-  }
-
-  function setCounts(errors, warnings, infos) {
-    const held = { error: errors, warn: warnings, info: infos };
-
-    SEVERITIES.forEach((severity) => {
-      lines.get(severity).textContent = shown.has(severity) ? '(' + held[severity] + ')' : '';
-    });
   }
 
   // How many issues a lint found, said in the tab's own name — at-a-glance feedback without opening the
@@ -285,7 +292,6 @@ export default function(modeler, parent, options = {}) {
 
     emptyHint.style.display = ids.length ? 'none' : '';
     setBadge(errors, warnings, infos);
-    setCounts(errors, warnings, infos);
     markCanvas(issues);
   }
 
@@ -296,7 +302,6 @@ export default function(modeler, parent, options = {}) {
     groups.clear();
     emptyHint.style.display = 'none';
     setBadge(0, 0, 0);
-    setCounts(0, 0, 0);
     markCanvas({});
   }
 

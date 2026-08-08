@@ -5,6 +5,7 @@ import 'bpmn-js-bpmnlint/dist/assets/css/bpmn-js-bpmnlint.css';
 import 'bpmn-js-side-panel/assets/side-panel.css';
 import 'bpmn-js-animation/assets/animation.css';
 import 'bpmn-js-animation/assets/token-panel.css';
+import 'bpmn-js-toolbar/assets/toolbar.css';
 import './app.less';
 
 import BpmnModeler from 'bpmn-js/lib/Modeler';
@@ -21,11 +22,12 @@ import {
   SimulatorModule,
   PlaybackModule,
   TokenPanelModule,
-  ModeModule
+  ModeModule,
+  AUTO_FOCUS_ICON       // the glyph for the setting; the control is the host's to place
 } from 'bpmn-js-animation';
 
 import createModeButtons, { modeIcon } from './mode-buttons.js';
-import createToolbar from './modules/toolbar/index.js'; // on-canvas file/view toolbar (open/save/export/zoom)
+import createToolbar from 'bpmn-js-toolbar'; // on-canvas file/view toolbar (load/save/export/zoom)
 
 import newDiagram from './newDiagram.bpmn?raw';
 
@@ -71,8 +73,42 @@ modeler.importXML(newDiagram);
 // the on-canvas Simulation / Playback buttons (Model = neither active)
 createModeButtons(modeler);
 
-// On-canvas file/view toolbar (open, save, export SVG, centre, zoom) — the packaged toolbar module.
-createToolbar(modeler);
+// On-canvas file/view toolbar (load, save, export SVG, centre, zoom).
+//
+// Loading, saving and exporting are about the model, so they have no place while a simulation or a playback
+// is on: the diagram is not being edited there, and a control that can say nothing should not be offered.
+// Looking at a diagram is valid whatever is happening on it, so centre and zoom stay in every mode.
+//
+// Auto-focus takes their place while a run is on, being about the canvas and about a run: while it is on the
+// run is followed as it plays, the active instance brought to the front and the canvas drilled into a
+// collapsed sub-process and back out. The setting is the animator's, so the button reads it, writes it and
+// follows it changing. The toolbar knows none of this and is told an icon, a type, an action, and which
+// configuration to show.
+var toolbar = createToolbar(modeler, {
+  buttons: {
+    'auto-focus': {
+      icon: AUTO_FOCUS_ICON,
+      type: 'toggle',
+      title: 'Auto-focus',
+      pressed: modeler.get('animator').getAutoFocus(),
+      action: function(on) { modeler.get('animator').autoFocus(on); }
+    }
+  },
+  configurations: {
+    model: [ 'load', 'save', 'export', 'center', 'zoom-in', 'zoom-out' ],
+    run: [ 'auto-focus', 'center', 'zoom-in', 'zoom-out' ]
+  },
+  configuration: 'model'
+});
+
+modeler.on('mode.changed', function(event) {
+  toolbar.setConfiguration(event.mode === 'model' ? 'model' : 'run');
+});
+
+// Whoever else writes the setting, the button says what it is.
+modeler.on('autoFocus.changed', function(event) {
+  toolbar.setPressed('auto-focus', event.autoFocus);
+});
 
 // Optional deep-linking: ?src=<url> loads a diagram on startup.
 var src = new URL(window.location.href).searchParams.get('src');

@@ -29,10 +29,6 @@ In addition to the application, this repository provides four reusable modules:
   `bpmn-workbench/issues/severities.js`, which reads a rule's severity in each of the forms bpmnlint
   accepts and returns a configuration for `Linting#setLinterConfig` without touching the one it was
   given.
-- `bpmn-workbench/toolbar` — a self-contained on-canvas file/view toolbar (open, save, export SVG,
-  centre, zoom) with inline SVG icons and its own CSS. `import createToolbar from
-  'bpmn-workbench/toolbar'; createToolbar(modeler);` — no HTML, CSS link, or icon font required (the
-  module needs a CSS loader in the host bundler, as it imports its stylesheet).
 - `bpmn-workbench/bpmn2svg` — a headless BPMN→SVG renderer, available both as a `bpmn2svg` command and
   as a reusable module (`renderBpmnToSvg`, `withDevServer`, `runCli`) for building app-specific
   variants. See [Rendering diagrams to SVG](#rendering-diagrams-to-svg-bpmn2svg) below.

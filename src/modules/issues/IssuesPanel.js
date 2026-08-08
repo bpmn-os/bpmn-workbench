@@ -25,9 +25,11 @@ IssuesPanel.prototype._init = function() {
     return; // no side panel → the Issues tab is not shown
   }
 
-  const { body } = sidePanel.addTab({
+  const label = this._config.label || 'Issues';
+
+  const { header, body } = sidePanel.addTab({
     id: 'issues',
-    label: this._config.label || 'Issues',
+    label,
     priority: this._config.priority != null ? this._config.priority : 10
   });
 
@@ -45,6 +47,6 @@ IssuesPanel.prototype._init = function() {
   createIssues(
     { get: (name) => this._injector.get(name, false) },
     body,
-    { descriptions }
+    { descriptions, header, name: label }
   );
 };

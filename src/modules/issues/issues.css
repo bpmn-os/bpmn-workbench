@@ -19,11 +19,9 @@
   box-sizing: border-box;
 }
 
-/* The severities looked for: one line each, carrying its mark, its name and, while it is looked for, how
-   many there are. It sits where the "Show issues" switch sat and keeps that bar's 64px, the height of the
-   properties-panel and token-panel headers, so the panel below it begins where it always did. With none of
-   them on it says what that switch said when it was off. A line that is off is greyed and shows no count:
-   its rules are not run, so there is nothing to count. */
+/* The severities looked for, each with its mark and its name. They stand on one line in the tab's band,
+   under the tab's name, where a control that governs the whole list belongs; a host that hands over no band
+   gets them above the list instead, in the column they were, keeping the 64px they always had. */
 .bpmn-issues-severities {
   display: flex;
   flex-direction: column;
@@ -33,6 +31,28 @@
   padding: 6px 10px;
   background-color: var(--bjs-grey-95, hsl(225, 10%, 95%));
   border-bottom: 1px solid var(--bjs-grey-75, hsl(225, 10%, 75%));
+}
+
+/* In a band the block is a line, and gives up everything the band already is: its height, its field, its
+   rule and its padding. The centring goes with them — it holds three lines in the middle of a block, and
+   would hold three marks in the middle of a band. */
+.bjs-tab-header > .bpmn-issues-severities {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  min-height: 0;
+  max-height: none;
+  padding: 0;
+  background: none;
+  border-bottom: none;
+}
+
+/* A severity pays 4px on either side so that its hover wash stands off its mark. The first would then begin
+   4px inside the band's own inset, and its mark would sit right of the name above it; it pays nothing on the
+   left instead, and its wash begins where the name does. */
+.bjs-tab-header > .bpmn-issues-severities > .bpmn-issues-severity:first-child {
+  padding-left: 0;
 }
 
 /* the mark, the name and its count read as one phrase, so they sit together rather than at either end */
@@ -73,10 +93,6 @@
 .bpmn-issues-severity[aria-pressed="false"] .bpmn-issues-mark {
   color: var(--bjs-grey-55, hsl(225, 10%, 55%));
   opacity: 0.5;
-}
-
-.bpmn-issues-count {
-  color: var(--bjs-grey-55, hsl(225, 10%, 55%));
 }
 
 /* empty state — muted italic */

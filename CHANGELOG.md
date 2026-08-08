@@ -3,6 +3,18 @@
 All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Changed
+- The on-canvas file and view toolbar moved to [`bpmn-js-toolbar`](https://github.com/bpmn-os/bpmn-js-toolbar),
+  which this repository now depends on. It gained buttons a host contributes and named configurations a
+  host switches between, and it no longer imports its own stylesheet: a host imports
+  `bpmn-js-toolbar/assets/toolbar.css`.
+
+### Removed
+- The `bpmn-workbench/toolbar` export. Consumers import `createToolbar` from `bpmn-js-toolbar` instead;
+  redistributing it here would put a copy of the package behind a second name.
+
 ## [0.1.0] - 2026-07-13
 
 ### Added
