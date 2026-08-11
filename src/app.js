@@ -16,6 +16,11 @@ import IssuesPanelModule from './modules/issues/index.js'; // self-registering "
 
 import SidePanelModule from 'bpmn-js-side-panel';
 
+// A bpmn:DataStore behind every bpmn:DataStoreReference. bpmn-js creates the store's counterpart, a
+// bpmn:DataObject, for every bpmn:DataObjectReference, and creates nothing for a store, so a store
+// reference dropped from the palette refers to nothing for the life of the diagram.
+import DataStoreModule from 'bpmn-js-datastore';
+
 // Token animation (the swap-in for bpmn-js-token-simulation): the interactive simulator, the playback
 // controller, the Simulation side-panel tab, and the mode controller that toggles editing ⇄ simulation.
 import {
@@ -54,6 +59,7 @@ var modeler = new BpmnModeler({
       + '</div>'
   },
   additionalModules: [
+    DataStoreModule,
     SidePanelModule,
     LintModule,
     IssuesPanelModule,        // → "Issues" tab
